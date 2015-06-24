@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-25 03:58:27
+* @Last Modified time: 2015-06-25 04:02:22
 */
 
 // jshint ignore:start
@@ -64,6 +64,8 @@ app.get('/', function (req, res) {
             if (now === 0) {
                 now = 24;
             }
+
+            console.log('now = ', now);
 
             // 生成重复的字符串儿
             text = '我是豆瓣大笨鸡，\r\n我正在练习报时，\r\n' + text.repeat(now);
