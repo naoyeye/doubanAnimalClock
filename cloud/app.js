@@ -109,6 +109,6 @@ function postToDouban (accessToken, text, callback) {
 
 
 // 最后，必须有这行代码来使 express 响应 HTTP 请求
-app.listen(80);
+app.listen(8080);
 
 // /* jshint ignore:end */
