@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-25 04:09:32
+* @Last Modified time: 2015-06-25 04:12:42
 */
 
 // jshint ignore:start
@@ -57,26 +57,27 @@ app.get('/', function (req, res) {
             var rule = new schedule.RecurrenceRule();
             rule.minute = [0];
 
-            // 时间跟文字关系处理
+
+            // 调整时区
             var d = new Date(); //创建一个Date对象
             var localTime = d.getTime();
             var localOffset = d.getTimezoneOffset() * 60000; //获得当地时间偏移的毫秒数
             var utc = localTime + localOffset; //utc即GMT时间
             var offset = 8; //以北京时间为例，东8区
             var beijing = utc + (3600000 * offset);
-            var date = new Date(beijing);
-
-            var now = date.getHours();
-            var text = '咯~'; // todo: 多种文字形式 或者 支持前端页面中 input 传值？
+            var date = new Date(beijing); // 得到最终的准确时间
+            var now = date.getHours(); // 得到当前小时
 
             if (now === 0) {
                 now = 24;
             }
 
-            console.log('now = ', now);
+            // console.log('now = ', now);
+
+            var string = '咯~'; // todo: 多种文字形式 或者 支持前端页面中 input 传值？
 
             // 生成重复的字符串儿
-            text = '我是豆瓣大笨鸡，\r\n我正在练习报时，\r\n' + text.repeat(now);
+            var text = '我是豆瓣大笨鸡，\r\n我正在练习报时，\r\n' + string.repeat(now);
 
             // 开始自动定时任务
             var autoTask = schedule.scheduleJob(rule, function () {
