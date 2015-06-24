@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-25 04:02:22
+* @Last Modified time: 2015-06-25 04:09:32
 */
 
 // jshint ignore:start
@@ -58,7 +58,15 @@ app.get('/', function (req, res) {
             rule.minute = [0];
 
             // 时间跟文字关系处理
-            var now = new Date().getHours();
+            var d = new Date(); //创建一个Date对象
+            var localTime = d.getTime();
+            var localOffset = d.getTimezoneOffset() * 60000; //获得当地时间偏移的毫秒数
+            var utc = localTime + localOffset; //utc即GMT时间
+            var offset = 8; //以北京时间为例，东8区
+            var beijing = utc + (3600000 * offset);
+            var date = new Date(beijing);
+
+            var now = date.getHours();
             var text = '咯~'; // todo: 多种文字形式 或者 支持前端页面中 input 传值？
 
             if (now === 0) {
