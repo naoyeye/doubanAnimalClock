@@ -1,6 +1,12 @@
-// jshint ignore:start 
+/* 
+* @Author: Jiyun
+* @Date:   2015-06-25 03:35:03
+* @Last Modified by:   Jiyun
+* @Last Modified time: 2015-06-25 03:58:27
+*/
 
-// 在 Cloud code 里初始化 Express 框架
+// jshint ignore:start
+
 var express = require('express');
 
 var request = require('request');
@@ -24,68 +30,67 @@ app.use(session({
 }));
 app.use(everyauthCN.middleware());
 
-// 为字符串添加 repeat 方法
-if(!String.repeat){//判断是否存在这个方法
-    String.prototype.repeat = function(l){//创建repeat方法
-        return new Array(l + 1).join(this);//创建元素值为空、个数为重复次数+1的数组，用字符串自身做为分隔符连接起来，返回连接后的值。
+everyauthCN.debug = false;
+
+// 为字符串添加 repeat 方法:
+// 判断是否存在这个方法
+if (!String.repeat) {
+    // 创建repeat方法
+    String.prototype.repeat = function (l) {
+        // 创建元素值为空、个数为重复次数+1的数组，用字符串自身做为分隔符连接起来，返回连接后的值。
+        return new Array(l + 1).join(this);
     }
 }
 
-// // 使用 Express 路由 API 服务 / 的 HTTP GET 请求
-app.get('/', function(req, res) {
-
-
+app.get('/', function (req, res) {
 
     // 判断是不是拿到了 token
     if (typeof req.session.auth !== 'undefined') {
+
         // 判断是不是豆瓣大笨鸡的 uid
-
-        // console.log(req.session.auth.douban.user);
-
-        if (req.session.auth.douban.user.uid === '67736974') {
+        // todo 通过 config 增加多个帐号
+        if (req.session.auth.douban.user.id === '67736974') {
+            // 取得 token
             var accessToken = req.session.auth.douban.accessToken;
 
+            // 定义自动定时任务的规则
             var rule = new schedule.RecurrenceRule();
             rule.minute = [0];
 
-            // var chi = [];
+            // 时间跟文字关系处理
             var now = new Date().getHours();
-            var text = '咯~';
+            var text = '咯~'; // todo: 多种文字形式 或者 支持前端页面中 input 传值？
 
             if (now === 0) {
                 now = 24;
             }
 
-            // console.log('text 1 = ', text.repeat(now));
-            text = text.repeat(now);
-            // console.log('text 2 = ', text);
+            // 生成重复的字符串儿
+            text = '我是豆瓣大笨鸡，\r\n我正在练习报时，\r\n' + text.repeat(now);
 
-            var autoTask = schedule.scheduleJob(rule, function(){
-
-                // console.log('text 1 = ', now * text);
-                // text = now * text;
-                // console.log('text 2 = ', text);
-
+            // 开始自动定时任务
+            var autoTask = schedule.scheduleJob(rule, function () {
                 postToDouban(accessToken, text, function (err, httpResponse, body) {
-                    console.log('豆瓣广播发布成功！偶也');
-                    // res.render('hello', {message: '发布成功'});
-                    // res.json({error:err, message: null, data: JSON.parse(body)});
+                    // todo: mail to me
+                    // if (!err) {
+                    //     console.log('豆瓣广播发布成功！偶也');
+                    // } else {
+                    //     console.error(error, body);
+                    // }
                 });
             });
 
             res.render('hello', {message: '欢迎豆瓣大笨鸡！'});
+            return;
+
         } else {
-            res.render('hello', {message: '你不是豆瓣大笨鸡！'});
+            res.render('hello', {message: '骗谁呢？你根本不是豆瓣大笨鸡！'});
             return;
         }
 
-
     } else {
-        // res.render('hello', {friends: 10});
-        res.render('hello', {message: '需要用豆瓣大笨鸡的账号登录'});
+        res.render('hello', {message: '请问，你是豆瓣大笨鸡吗？'});
     }
-
-    
 });
 
 // 发送豆瓣广播
@@ -95,7 +100,6 @@ function postToDouban (accessToken, text, callback) {
             headers: {'Authorization': 'Bearer ' + accessToken},
             timeout: 3000
         }, function (err, httpResponse, body) {
-            // console.log('body', body);
             if (callback && typeof callback === 'function') {
                 callback(err, httpResponse, body);
             }
@@ -103,12 +107,9 @@ function postToDouban (accessToken, text, callback) {
 
     var form = r.form();
     form.append('text', text);
+    // todo: 可增加配图
 }
 
-
-
-
-// 最后，必须有这行代码来使 express 响应 HTTP 请求
 app.listen(8080);
 
-// /* jshint ignore:end */
+// jshint ignore:end

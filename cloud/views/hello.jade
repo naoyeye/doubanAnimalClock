@@ -2,12 +2,14 @@ doctype html
 html(lang='zh-cmn-Hans')
     head
         meta(charset='utf-8')
-        title 豆瓣动物钟
+        title 豆瓣大笨鸡
         meta(name='description', content='')
         meta(name='keywords', content='')
         meta(http-equiv='X-UA-Compatible', content='IE=edge, chrome=1')
         meta(name='viewport', content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1, user-scalable=no')
         meta(name='theme-color', content='#3baa24')
+        link(rel='shortcut icon' href='http://img3.douban.com/icon/u67736974-6.jpg' type='image/x-icon')
+        link(rel='icon', sizes='192x192', href='http://img3.douban.com/icon/u67736974-6.jpg')
 
         style.
             * {
@@ -19,7 +21,7 @@ html(lang='zh-cmn-Hans')
                 // min-height: 500px; // thanks @zhailin
                 width: 100%;
                 background: #fff;
-                font-family: "Lantinghei SC", "Microsoft Yahei", "Hiragino Sans GB", "Helvetica Neue", Helvetica, Arial, sans-serif;
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
                 line-height: 1.78;
                 font-size: 14px;
                 text-align: center;
@@ -32,33 +34,66 @@ html(lang='zh-cmn-Hans')
                 // -webkit-transform-style: preserve-3d;
             }
 
-            #button a {
+            #wrap {
+                padding-top: 30px;
+            }
+
+            h1 {
+                font-weight: normal;
+            }
+
+            a {
+                color: #3fa156;
+                text-decoration: none;
+            }
+
+            .message {
+                padding: 30px 0;
+            }
+
+            a.button  {
                 display: inline-block();
                 zoom: 1;
                 vertical-align: middle;
                 padding: 10px;
+                background: #c00;
+                color: #fff;
+                border-radius: 3px;
+                background: #3fa156;
+                border: 1px solid #528641;
             }
 
+            footer {
+                position: absolute;
+                bottom: 20px;
+                left: 0;
+                width: 100%;
+                color: #aaa;
+                font-size: 12px;
+            }
     body
+        #wrap
+            img(src="http://img3.douban.com/icon/ul67736974-6.jpg")
+            h1 豆瓣大笨鸡の官方网站
 
-        h1 豆瓣大笨鸡
+            p.message #{message}
 
-        p #{message}
+            if !everyauth.loggedIn
+                a.button(href='/auth/douban') 我就是大笨鸡，快让我进去！
 
-        if !everyauth.loggedIn
-            a(href='/auth/douban') 用豆瓣账号登录
+            else if everyauth.douban
+                - var user = everyauth.douban.user
 
-        else if everyauth.douban
-            - var user = everyauth.douban.user
+                if user.id === '67736974'
+                    //- p.description= JSON.stringify(sess)
+                    //- p.uid= user.uid
+                    //- p#name= user.name
+                    //- p.created= user.created
+                    //- img(src='#{ user.large_avatar }')
 
-            if user.uid === '67736974'
-                //- p.description= JSON.stringify(sess)
-                p.uid= user.uid
-                p#name= user.name
-                p.created= user.created
-                img(src='#{ user.large_avatar }')
+                else
+                    p 不跟你玩儿！
 
-                #button
-                    a(href='javascript:void(0);') 嘿！伙计们！叫起来！
-            else
-                p 不给你玩！
+        footer
+            | copyright 2015 by 
+            a(href='http://www.douban.com/people/dabenji/', target='_blank') dabenji
