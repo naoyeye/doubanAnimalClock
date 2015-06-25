@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-25 22:38:07
+* @Last Modified time: 2015-06-25 22:46:50
 */
 
 // jshint ignore:start
@@ -236,11 +236,14 @@ function postToDouban (accessToken, refresh_token, text, callback) {
             // 判断如果 106 错误 token 过期 (access_token_has_expired)
             // 则去刷新获取 token (refresh_token)
             if (err && err.code === 106) {
+                console.error('需要重新授权');
                 sendMail('紧急！豆瓣大笨鸡报时失败！需要重新授权！', 'RT');
                 refreshToken(refresh_token);
             } else if (err) {
+                console.error(err);
                 sendMail('豆瓣大笨鸡报时失败！', err);
             } else {
+                console.log('success!');
                 sendMail('豆瓣大笨鸡报时成功！', text);
             }
 
