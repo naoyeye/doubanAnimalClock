@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-25 22:46:50
+* @Last Modified time: 2015-06-26 00:37:11
 */
 
 // jshint ignore:start
@@ -18,12 +18,23 @@ var conf = require('./config/sns-config');
 var authSettings = require('./config/auth-settings');
 var nodemailer = require('nodemailer');
 
+
 var app = express();
 app.set('views','cloud/views');// 设置模板目录
 app.set('view engine', 'jade');
 
-app.use(express.bodyParser());// 读取请求 body 的中间件
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var cookieSession = require('cookie-session');
+
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+app.use(bodyParser.json());
+
 app.use(express.static('./public'));
+app.use(cookieParser());
+app.use(cookieSession({secret: 'doubananimalclock'}));
 
 app.use(session({
     secret: 'everyauth-cn',
@@ -35,8 +46,10 @@ app.use(everyauthCN.middleware());
 
 everyauthCN.debug = false;
 
-var now;
 
+
+
+var now;
 
 // 为字符串添加 repeat 方法:
 // 判断是否存在这个方法
@@ -56,6 +69,9 @@ var smtpTransport = nodemailer.createTransport('SMTP',{
         pass: conf.mailer.pass
     }
 });
+
+
+
 
 app.get('/', function (req, res) {
 
@@ -236,15 +252,23 @@ function postToDouban (accessToken, refresh_token, text, callback) {
             // 判断如果 106 错误 token 过期 (access_token_has_expired)
             // 则去刷新获取 token (refresh_token)
             if (err && err.code === 106) {
-                console.error('需要重新授权');
-                sendMail('紧急！豆瓣大笨鸡报时失败！需要重新授权！', 'RT');
+                console.error('紧急！豆瓣大笨鸡报时失败！需要重新授权！', err);
+                sendMail('紧急！豆瓣大笨鸡报时失败！需要重新授权！', err, function (mailError, mailResponse) {
+                    console.log('发信：', mailError, mailResponse);
+                });
+
                 refreshToken(refresh_token);
+
             } else if (err) {
-                console.error(err);
-                sendMail('豆瓣大笨鸡报时失败！', err);
+                console.error('操！豆瓣大笨鸡报时失败！, err:', err);
+                sendMail('操！豆瓣大笨鸡报时失败！', err, function (mailError, mailResponse) {
+                    console.log('发信：', mailError, mailResponse);
+                });
             } else {
-                console.log('success!');
-                sendMail('豆瓣大笨鸡报时成功！', text);
+                console.log('哈哈！豆瓣大笨鸡报时成功！');
+                sendMail('哈哈！豆瓣大笨鸡报时成功！', text, function (mailError, mailResponse) {
+                    console.log('发信：', mailError, mailResponse);
+                });
             }
 
             if (callback && typeof callback === 'function') {
@@ -274,12 +298,15 @@ function refreshToken (refresh_token) {
         if (!error && response.statusCode == 200) {
             // 拿到新的 access_token 和 refresh_token，再次发送豆瓣广播
             postToDouban(resBody.access_token, resBody.refresh_token, text, callback);
+        } else {
+            console.error('refresh_token 失败！', error, resBody);
         }
     });
 }
 
 // 发送邮件
 function sendMail (subject, text, callback) {
+    console.log('准备发信...');
     var mailOptions = {
         from: '豆瓣大笨鸡 <'+ conf.mailer.user + '>',
         to: conf.mailer.recipient.join(','), // list of receivers
