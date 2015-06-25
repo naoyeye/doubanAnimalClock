@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-25 16:42:41
+* @Last Modified time: 2015-06-25 16:56:35
 */
 
 // jshint ignore:start
@@ -60,21 +60,21 @@ app.get('/', function (req, res) {
 
             var text = generateText();
 
-            console.log(text);
+            // console.log(text);
 
             // 开始自动定时任务
             var autoTask = schedule.scheduleJob(rule, function () {
 
 
 
-                // postToDouban(accessToken, text, function (err, httpResponse, body) {
-                //     // todo: mail to me
-                //     // if (!err) {
-                //     //     console.log('豆瓣广播发布成功！偶也');
-                //     // } else {
-                //     //     console.error(error, body);
-                //     // }
-                // });
+                postToDouban(accessToken, text, function (err, httpResponse, body) {
+                    // todo: mail to me
+                    // if (!err) {
+                    //     console.log('豆瓣广播发布成功！偶也');
+                    // } else {
+                    //     console.error(error, body);
+                    // }
+                });
             });
 
             res.render('hello', {message: '欢迎豆瓣大笨鸡！'});
