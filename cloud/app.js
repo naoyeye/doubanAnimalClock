@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-25 20:02:21
+* @Last Modified time: 2015-06-25 20:30:09
 */
 
 // jshint ignore:start
@@ -138,7 +138,7 @@ function generateText () {
     // } else if (now < 6) {
     //     half = '凌晨';
     // }
-    // var text = half + now + '点整: \r\n' + string.repeat(now);
+    // var text = half + now + '点: \r\n' + string.repeat(now);
 
     // 新版
     var text;
@@ -147,76 +147,76 @@ function generateText () {
     // todo: 优化逻辑，减少 hardcode
     switch (now) {
         case 1:
-            text = '凌晨1点整。\r\n你还不睡吗？在干嘛类？\r\n' + repeatString;
+            text = '凌晨1点。\r\n' + '呼~'.repeat(now);
             break;
         case 2:
-            text = '凌晨2点整。\r\n哎呀！好饿！！\r\n' + '饿~'.repeat(now);
+            text = '凌晨2点。\r\n' + '呼~'.repeat(now);
             break;
         case 3:
-            text = '凌晨3点整。\r\n此刻，我只想做一只猫！\r\n' + '喵~'.repeat(now);
+            text = '凌晨3点。\r\n' + '呼~'.repeat(now);
             break;
         case 4:
-            text = '凌晨4点整。\r\n让我的啼声划破这黎明前的黑暗！\r\n' + repeatString;
+            text = '凌晨4点。\r\n' + '呼~'.repeat(now);
             break;
         case 5:
-            text = '凌晨5点整。\r\n快给我喂食！\r\n' + repeatString;
+            text = '凌晨5点。\r\n' + '呼~'.repeat(now);
             break;
         case 6:
-            text = '早上6点整。\r\n快起床！\r\n' + '嗷~'.repeat(now);
+            text = '早上6点。\r\n' + '呼~'.repeat(now);
             break;
         case 7:
-            text = '早上7点整。\r\n' + repeatString;
+            text = '早上7点。\r\n' + '呼~'.repeat(now);
             break;
         case 8:
-            text = '早上8点整。\r\n煎饼果子豆浆油条包子老豆腐！\r\n' + repeatString;
+            text = '早上8点。\r\n' + '饿~'.repeat(now);
             break;
         case 9:
-            text = '早上9点整。\r\n我在思念我的床，她一定也很孤独。\r\n' + repeatString;
+            text = '早上9点。\r\n' + repeatString;
             break;
         case 10:
-            text = '早上10点整。\r\n我爱蒋大为！\r\n' + repeatString;
+            text = '早上10点。\r\n我爱蒋大为！\r\n' + repeatString;
             break;
         case 11:
-            text = '早上11点整。\r\n体力不..支..了...\r\n' + repeatString;
+            text = '早上11点。\r\n' + '喵~'.repeat(now);
             break;
         case 12:
-            text = '中午12点整。\r\n吃饱喝足。\r\n' + repeatString;
+            text = '中午12点。\r\n' + repeatString;
             break;
         case 13:
-            text = '下午1点整。\r\n有人说我是机器鸡，T_T。\r\n' + string.repeat(1);
+            text = '下午1点。\r\n' + string.repeat(1);
             break;
         case 14:
-            text = '下午2点整。\r\n哎呦？窗外的风景不错哦。\r\n' + string.repeat(2);
+            text = '下午2点。\r\n' + string.repeat(2);
             break;
         case 15:
-            text = '下午3点整。\r\n都没人跟我表白！\r\n' + '哼！'.repeat(3);
+            text = '下午3点。\r\n' + '哼！'.repeat(3);
             break;
         case 16:
-            text = '下午4点整。\r\n好累哦~\r\n' + string.repeat(4);
+            text = '下午4点。\r\n' + string.repeat(4);
             break;
         case 17:
-            text = '下午5点整。\r\n快下班啦！\r\n' + '嗷~'.repeat(5);
+            text = '下午5点。\r\n' + '嗷~'.repeat(5);
             break;
         case 18:
-            text = '下午6点整。\r\n回家路上要小心。\r\n' + string.repeat(6);
+            text = '下午6点。\r\n' + string.repeat(6);
             break;
         case 19:
-            text = '晚上7点整。\r\n终于回到我的鸡窝了。\r\n' + string.repeat(7);
+            text = '晚上7点。\r\n' + string.repeat(7);
             break;
         case 20:
-            text = '晚上8点整。\r\n吃饭，背单词，打卡。\r\n' + string.repeat(8);
+            text = '晚上8点。\r\n吃食，背单词，打卡。\r\n' + string.repeat(8);
             break;
         case 21:
-            text = '晚上9点整。\r\n我去跑步了。\r\n' + string.repeat(9);
+            text = '晚上9点。\r\n去跑个步！\r\n' + string.repeat(9);
             break;
         case 22:
-            text = '晚上10点整。\r\n睡了，晚安。\r\n' + '呼~'.repeat(10);
+            text = '晚上10点。\r\n洗洗睡了，晚安。\r\n' + '呼~'.repeat(10);
             break;
         case 23:
-            text = '晚上11点整\r\n' + '呼~'.repeat(11);
+            text = '晚上11点。\r\n' + '呼~'.repeat(11);
             break;
         case 24:
-            text = '呼~'.repeat(12);
+            text = '零点。\r\n' + '呼~'.repeat(12);
             break;
     }
 
@@ -246,6 +246,11 @@ function postToDouban (accessToken, refresh_token, text, callback) {
 
     var form = r.form();
     form.append('text', text);
+
+    // 晚上9点时 广播里增加一张配图
+    if (now === 21) {
+        form.append('image', request.get('http://7bv90p.com1.z0.glb.clouddn.com/333.png'));
+    }
     // todo: 可增加配图
 }
 
