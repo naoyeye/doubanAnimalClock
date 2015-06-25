@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-25 21:31:59
+* @Last Modified time: 2015-06-25 21:43:10
 */
 
 // jshint ignore:start
@@ -177,7 +177,7 @@ function generateText () {
             text = '早上9点。\r\n' + repeatString;
             break;
         case 10:
-            text = '早上10点。\r\n我爱蒋大为！\r\n' + repeatString;
+            text = '早上10点。\r\n' + repeatString;
             break;
         case 11:
             text = '早上11点。\r\n' + '喵~'.repeat(now);
@@ -210,7 +210,7 @@ function generateText () {
             text = '晚上8点。\r\n吃食，背单词，打卡。\r\n' + string.repeat(8);
             break;
         case 21:
-            text = '晚上9点。\r\n' + string.repeat(7);
+            text = '晚上9点。\r\n' + string.repeat(9);
             break;
         case 22:
             text = '晚上10点。\r\n去跑个步！\r\n' + string.repeat(10);
