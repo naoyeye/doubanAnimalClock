@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-25 19:48:50
+* @Last Modified time: 2015-06-25 20:02:21
 */
 
 // jshint ignore:start
@@ -71,7 +71,7 @@ app.get('/', function (req, res) {
 
             // 定义自动定时任务的规则
             var rule = new schedule.RecurrenceRule();
-            rule.minute = [59]; // 会有延迟，所以提前一分钟
+            rule.minute = [0]; // 会有延迟
 
             /* just for testing */
             // var text = generateText();
@@ -268,8 +268,8 @@ function refreshToken (refresh_token) {
 // 发送邮件
 function sendMail (subject, text, callback) {
     var mailOptions = {
-        from: '豆瓣大笨鸡 <'+ config.mailer.user + '>',
-        to: config.mailer.recipient, // list of receivers
+        from: '豆瓣大笨鸡 <'+ conf.mailer.user + '>',
+        to: conf.mailer.recipient, // list of receivers
         subject: subject,
         text: text
     };
