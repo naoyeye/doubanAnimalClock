@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-25 16:56:35
+* @Last Modified time: 2015-06-25 17:06:24
 */
 
 // jshint ignore:start
@@ -58,15 +58,15 @@ app.get('/', function (req, res) {
             rule.minute = [0];
 
 
-            var text = generateText();
+            // var text = generateText();
 
             // console.log(text);
 
             // 开始自动定时任务
             var autoTask = schedule.scheduleJob(rule, function () {
 
-
-
+                var text = generateText();
+                
                 postToDouban(accessToken, text, function (err, httpResponse, body) {
                     // todo: mail to me
                     // if (!err) {
