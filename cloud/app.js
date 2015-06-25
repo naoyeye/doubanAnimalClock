@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-25 21:43:10
+* @Last Modified time: 2015-06-25 22:38:07
 */
 
 // jshint ignore:start
@@ -238,6 +238,8 @@ function postToDouban (accessToken, refresh_token, text, callback) {
             if (err && err.code === 106) {
                 sendMail('紧急！豆瓣大笨鸡报时失败！需要重新授权！', 'RT');
                 refreshToken(refresh_token);
+            } else if (err) {
+                sendMail('豆瓣大笨鸡报时失败！', err);
             } else {
                 sendMail('豆瓣大笨鸡报时成功！', text);
             }
