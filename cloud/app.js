@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-25 20:30:09
+* @Last Modified time: 2015-06-25 21:10:48
 */
 
 // jshint ignore:start
@@ -34,6 +34,9 @@ app.use(session({
 app.use(everyauthCN.middleware());
 
 everyauthCN.debug = false;
+
+var now;
+
 
 // 为字符串添加 repeat 方法:
 // 判断是否存在这个方法
@@ -120,7 +123,7 @@ function generateText () {
     var offset = 8; //以北京时间为例，东8区
     var beijing = utc + (3600000 * offset);
     var date = new Date(beijing); // 得到最终的准确时间
-    var now = date.getHours(); // 得到当前小时
+    now = date.getHours(); // 得到当前小时
 
     if (now === 0) {
         now = 24;
