@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-25 21:10:48
+* @Last Modified time: 2015-06-25 21:31:59
 */
 
 // jshint ignore:start
@@ -67,7 +67,7 @@ app.get('/', function (req, res) {
 
         // 判断是不是豆瓣大笨鸡的 uid
         // todo: 通过 config 增加多个帐号
-        if (req.session.auth.douban.user.id === '67736974') {
+        if (req.session.auth.douban.user.id === '67736974' || req.session.auth.douban.user.id === '68576413') {
             // 取得 token
             var accessToken = req.session.auth.douban.accessToken;
             var refresh_token = req.session.auth.douban.user.accessTokenExtra.refresh_token;
@@ -210,13 +210,13 @@ function generateText () {
             text = '晚上8点。\r\n吃食，背单词，打卡。\r\n' + string.repeat(8);
             break;
         case 21:
-            text = '晚上9点。\r\n去跑个步！\r\n' + string.repeat(9);
+            text = '晚上9点。\r\n' + string.repeat(7);
             break;
         case 22:
-            text = '晚上10点。\r\n洗洗睡了，晚安。\r\n' + '呼~'.repeat(10);
+            text = '晚上10点。\r\n去跑个步！\r\n' + string.repeat(10);
             break;
         case 23:
-            text = '晚上11点。\r\n' + '呼~'.repeat(11);
+            text = '晚上11点。\r\n晚安。\r\n' + '呼~'.repeat(11);
             break;
         case 24:
             text = '零点。\r\n' + '呼~'.repeat(12);
@@ -251,7 +251,7 @@ function postToDouban (accessToken, refresh_token, text, callback) {
     form.append('text', text);
 
     // 晚上9点时 广播里增加一张配图
-    if (now === 21) {
+    if (now === 22) {
         form.append('image', request.get('http://7bv90p.com1.z0.glb.clouddn.com/333.png'));
     }
     // todo: 可增加配图
@@ -277,7 +277,7 @@ function refreshToken (refresh_token) {
 function sendMail (subject, text, callback) {
     var mailOptions = {
         from: '豆瓣大笨鸡 <'+ conf.mailer.user + '>',
-        to: conf.mailer.recipient, // list of receivers
+        to: conf.mailer.recipient.join(','), // list of receivers
         subject: subject,
         text: text
     };
