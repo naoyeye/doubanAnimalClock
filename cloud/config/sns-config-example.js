@@ -4,7 +4,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-16 11:40:12
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-24 23:30:56
+* @Last Modified time: 2015-06-25 19:23:53
 */
 
 module.exports = {
@@ -26,8 +26,9 @@ module.exports = {
         appSecret: ''
     },
     douban: {
-        apiKey: '',
-        Secret: ''
+        apiKey: 'your apiKey',
+        Secret: 'your secret',
+        redirect_uri: 'your redirect uri'
     },
     renren: {
         appId: '',
@@ -37,5 +38,10 @@ module.exports = {
     taobao: {
         appKey: '',
         appSecret: ''
+    },
+    mailer: {
+        user: 'your poster mailer address',
+        pass: 'your password',
+        recipient: ['recipient address']
     }
 };

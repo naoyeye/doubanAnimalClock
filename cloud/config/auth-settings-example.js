@@ -77,7 +77,7 @@ everyauth
 
 everyauth
   .douban
-    .myHostname('http://han.im')
+    .myHostname('http://han.im') // your appliaction host
     .appId(conf.douban.apiKey)
     .appSecret(conf.douban.Secret)
     .findOrCreateUser( function (session, accessToken, accessTokenExtra, doubanUserMetadata) {
