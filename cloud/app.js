@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-26 03:35:40
+* @Last Modified time: 2015-06-27 17:02:15
 */
 
 // jshint ignore:start
@@ -33,6 +33,9 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 app.use(express.static('./public'));
+
+// 如果打开这俩，应用重启后，还会保持登录状态
+// 我觉得不太保险，所以注释掉了
 // app.use(cookieParser());
 // app.use(cookieSession({secret: 'doubananimalclock'}));
 
@@ -49,7 +52,8 @@ everyauthCN.debug = false;
 
 
 
-var now;
+var now; // 当前是第几个小时
+var image; // 广播配图
 
 // 为字符串添加 repeat 方法:
 // 判断是否存在这个方法
@@ -82,11 +86,15 @@ app.get('/', function (req, res) {
         // console.log('req.session.auth.douban.user = ', req.session.auth.douban.user);
 
         // 判断是不是豆瓣大笨鸡的 uid
-        // todo: 通过 config 增加多个帐号
+        // todo: 通过 config 增加多个帐
+        // 68576413 是本地测试的一个帐号
         if (req.session.auth.douban.user.id === '67736974' || req.session.auth.douban.user.id === '68576413') {
             // 取得 token
             var accessToken = req.session.auth.douban.accessToken;
             var refresh_token = req.session.auth.douban.user.accessTokenExtra.refresh_token;
+
+            // 提前获取广播配图
+            image = request.get('http://7bv90p.com1.z0.glb.clouddn.com/333.png');
 
             // 定义自动定时任务的规则
             var rule = new schedule.RecurrenceRule();
@@ -252,7 +260,7 @@ function postToDouban (accessToken, refresh_token, text, callback) {
             // 判断如果 106 错误 token 过期 (access_token_has_expired)
             // 则去刷新获取 token (refresh_token)
             if (err && err.code === 106) {
-                console.error('hot fuck！clock report fail! we need to refresh token', err);
+                console.error('HOT fuck！Clock fail! We need to refresh token!', err);
                 // mailSender('紧急！豆瓣大笨鸡报时失败！需要重新授权！', err, function (mailError, mailResponse) {
                 //     console.log('sender feecback:', mailError, mailResponse);
                 // });
@@ -260,12 +268,12 @@ function postToDouban (accessToken, refresh_token, text, callback) {
                 refreshToken(refresh_token);
 
             } else if (err) {
-                console.error('fuck！clock report fail!, err:', err);
-                mailSender('操！豆瓣大笨鸡报时失败！', err, function (mailError, mailResponse) {
-                    console.log('sender feecback:', mailError, mailResponse);
+                console.error('Fuck! Clock fail!, Error:', err, '\r\n Body:', body);
+                mailSender('操！豆瓣大笨鸡报时失败！', err.stringify(), function (mailError, mailResponse) {
+                    console.log('Sender feedback:', mailError, mailResponse);
                 });
             } else {
-                console.log('haha clock report success!');
+                console.log('LOL clock success!');
                 // mailSender('哈哈！豆瓣大笨鸡报时成功！', text, function (mailError, mailResponse) {
                 //     console.log('sender feecback:', mailError, mailResponse);
                 // });
@@ -281,7 +289,7 @@ function postToDouban (accessToken, refresh_token, text, callback) {
 
     // 22点 广播里增加一张配图
     if (now === 22) {
-        form.append('image', request.get('http://7bv90p.com1.z0.glb.clouddn.com/333.png'));
+        form.append('image', image);
     }
     // todo: 可增加配图
 }
