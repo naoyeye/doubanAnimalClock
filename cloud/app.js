@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-27 22:55:27
+* @Last Modified time: 2015-06-28 02:02:14
 */
 
 // jshint ignore:start
@@ -271,7 +271,7 @@ function postToDouban (accessToken, refresh_token, text, callback) {
 
             } else if (err) {
                 console.error('Fuck! Clock fail!, Error:', err, '\r\n Body:', body);
-                mailSender('操！豆瓣大笨鸡报时失败！', err.stringify(), function (mailError, mailResponse) {
+                mailSender('操！豆瓣大笨鸡报时失败！', err, function (mailError, mailResponse) {
                     console.log('Sender feedback:', mailError, mailResponse);
                 });
             } else {
