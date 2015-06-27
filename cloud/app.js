@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-28 03:01:11
+* @Last Modified time: 2015-06-28 03:02:54
 */
 
 // jshint ignore:start
@@ -98,7 +98,7 @@ app.get('/', function (req, res) {
 
             // 定义自动定时任务的规则
             var rule = new schedule.RecurrenceRule();
-            rule.minute = [2]; // 会有延迟
+            rule.minute = [0]; // 会有延迟
 
             /* just for testing */
             // var text = generateText();
