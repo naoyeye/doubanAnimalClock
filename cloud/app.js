@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-27 17:02:15
+* @Last Modified time: 2015-06-27 22:55:27
 */
 
 // jshint ignore:start
@@ -53,7 +53,7 @@ everyauthCN.debug = false;
 
 
 var now; // 当前是第几个小时
-var image; // 广播配图
+// var image; // 广播配图
 
 // 为字符串添加 repeat 方法:
 // 判断是否存在这个方法
@@ -94,11 +94,11 @@ app.get('/', function (req, res) {
             var refresh_token = req.session.auth.douban.user.accessTokenExtra.refresh_token;
 
             // 提前获取广播配图
-            image = request.get('http://7bv90p.com1.z0.glb.clouddn.com/333.png');
+            // image = request.get('http://7bv90p.com1.z0.glb.clouddn.com/333.png');
 
             // 定义自动定时任务的规则
             var rule = new schedule.RecurrenceRule();
-            rule.minute = [0]; // 会有延迟
+            rule.minute = [55]; // 会有延迟
 
             /* just for testing */
             // var text = generateText();
@@ -109,6 +109,8 @@ app.get('/', function (req, res) {
             var autoTask = schedule.scheduleJob(rule, function () {
 
                 var text = generateText();
+
+                // console.log('text = ', text);
 
                 postToDouban(accessToken, refresh_token, text, function (err, httpResponse, body) {
                     // if (!err) {
@@ -287,11 +289,11 @@ function postToDouban (accessToken, refresh_token, text, callback) {
     var form = r.form();
     form.append('text', text);
 
-    // 22点 广播里增加一张配图
-    if (now === 22) {
-        form.append('image', image);
-    }
-    // todo: 可增加配图
+    // // 22点 广播里增加一张配图
+    // if (now === 22) {
+    //     form.append('image', image);
+    // }
+    // // todo: 可增加配图
 }
 
 // 刷新获取 token
