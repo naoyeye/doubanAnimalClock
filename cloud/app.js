@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-28 03:02:54
+* @Last Modified time: 2015-06-30 11:19:31
 */
 
 // jshint ignore:start
@@ -51,7 +51,7 @@ everyauthCN.debug = false;
 
 
 
-
+var date;
 var now; // 当前是第几个小时
 // var image; // 广播配图
 
@@ -108,11 +108,26 @@ app.get('/', function (req, res) {
             // 开始自动定时任务
             var autoTask = schedule.scheduleJob(rule, function () {
 
+
+                // 调整时区
+                var d = new Date(); //创建一个Date对象
+                var localTime = d.getTime();
+                var localOffset = d.getTimezoneOffset() * 60000; //获得当地时间偏移的毫秒数
+                var utc = localTime + localOffset; //utc即GMT时间
+                var offset = 8; //以北京时间为例，东8区
+                var beijing = utc + (3600000 * offset);
+                date = new Date(beijing); // 得到最终的准确时间
+                now = date.getHours(); // 得到当前小时
+
+                if (now === 0) {
+                    now = 24;
+                }
+
                 var text = generateText();
 
                 // console.log('text = ', text);
 
-                postToDouban(accessToken, refresh_token, text, function (err, httpResponse, body) {
+                postToDouban(accessToken, refresh_token, text, date, function (err, httpResponse, body) {
                     // if (!err) {
                     //     console.log('豆瓣广播发布成功！偶也');
                     // } else {
@@ -141,19 +156,6 @@ function generateText () {
     // 多种文字形式 如：支持前端页面中 input 传值，或者通过 json 配置
     var string = '咯~';
 
-    // 调整时区
-    var d = new Date(); //创建一个Date对象
-    var localTime = d.getTime();
-    var localOffset = d.getTimezoneOffset() * 60000; //获得当地时间偏移的毫秒数
-    var utc = localTime + localOffset; //utc即GMT时间
-    var offset = 8; //以北京时间为例，东8区
-    var beijing = utc + (3600000 * offset);
-    var date = new Date(beijing); // 得到最终的准确时间
-    now = date.getHours(); // 得到当前小时
-
-    if (now === 0) {
-        now = 24;
-    }
 
     // 之前的版本
     // if (now < 12 && now > 6 || now === 6) {
@@ -253,7 +255,7 @@ function generateText () {
 }
 
 // 发送豆瓣广播
-function postToDouban (accessToken, refresh_token, text, callback) {
+function postToDouban (accessToken, refresh_token, text, date, callback) {
     var r = request.post('https://api.douban.com/shuo/v2/statuses/', {
             method: 'POST',
             headers: {'Authorization': 'Bearer ' + accessToken},
@@ -262,20 +264,22 @@ function postToDouban (accessToken, refresh_token, text, callback) {
             // 判断如果 106 错误 token 过期 (access_token_has_expired)
             // 则去刷新获取 token (refresh_token)
             if (err && err.code === 106) {
-                console.error('HOT fuck！Clock fail! We need to refresh token!', err);
+                console.error(date + '\r\nHOT fuck！Clock fail! We need to refresh token!', err);
                 // mailSender('紧急！豆瓣大笨鸡报时失败！需要重新授权！', err, function (mailError, mailResponse) {
                 //     console.log('sender feecback:', mailError, mailResponse);
                 // });
 
                 refreshToken(refresh_token);
-
+                console.log('===========');
             } else if (err) {
-                console.error('Fuck! Clock fail!, Error:', err, '\r\n Body:', body);
+                console.error(date + '\r\nFuck! Clock fail!, Error:', err, '\r\n Body:', body);
                 mailSender('操！豆瓣大笨鸡报时失败！', err, function (mailError, mailResponse) {
                     console.log('Sender feedback:', mailError, mailResponse);
                 });
+                console.log('===========');
             } else {
-                console.log('LOL clock success!');
+                console.log(date + '\r\nLOL clock success!');
+                console.log('===========');
                 // mailSender('哈哈！豆瓣大笨鸡报时成功！', text, function (mailError, mailResponse) {
                 //     console.log('sender feecback:', mailError, mailResponse);
                 // });
@@ -307,16 +311,16 @@ function refreshToken (refresh_token) {
     }, function (error, response, resBody) {
         if (!error && response.statusCode == 200) {
             // 拿到新的 access_token 和 refresh_token，再次发送豆瓣广播
-            postToDouban(resBody.access_token, resBody.refresh_token, text, callback);
+            postToDouban(resBody.access_token, resBody.refresh_token, text, date, callback);
         } else {
-            console.error('refresh_token fail！', error, resBody);
+            console.error(date + 'refresh_token fail！', error, resBody);
         }
     });
 }
 
 // 发送邮件
 function mailSender (subject, text, callback) {
-    console.log('sendMail...');
+    console.log(date + 'sendMail...');
     var mailOptions = {
         from: '豆瓣大笨鸡 <'+ conf.mailer.user + '>',
         to: conf.mailer.recipient.join(','), // list of receivers
