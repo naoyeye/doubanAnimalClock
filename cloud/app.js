@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-30 11:19:31
+* @Last Modified time: 2015-06-30 11:22:45
 */
 
 // jshint ignore:start
@@ -259,7 +259,7 @@ function postToDouban (accessToken, refresh_token, text, date, callback) {
     var r = request.post('https://api.douban.com/shuo/v2/statuses/', {
             method: 'POST',
             headers: {'Authorization': 'Bearer ' + accessToken},
-            timeout: 3000
+            timeout: 10000
         }, function (err, httpResponse, body) {
             // 判断如果 106 错误 token 过期 (access_token_has_expired)
             // 则去刷新获取 token (refresh_token)
