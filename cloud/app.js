@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-07-01 02:20:08
+* @Last Modified time: 2015-07-01 14:32:47
 */
 
 // jshint ignore:start
@@ -76,6 +76,7 @@ var smtpTransport = nodemailer.createTransport('SMTP',{
 
 
 
+console.log('====== start =====');
 
 app.get('/', function (req, res) {
 
@@ -119,9 +120,9 @@ app.get('/', function (req, res) {
                 date = new Date(beijing); // 得到最终的准确时间
                 now = date.getHours(); // 得到当前小时
 
-                if (now === 0) {
-                    now = 24;
-                }
+                // if (now === 0) {
+                //     now = 24;
+                // }
 
                 var text = generateText();
 
@@ -155,101 +156,113 @@ function generateText () {
     // todo:
     // 多种文字形式 如：支持前端页面中 input 传值，或者通过 json 配置
     var string = '咯~';
-
+    var text;
 
     // 之前的版本
-    // if (now < 12 && now > 6 || now === 6) {
-    //     half = '早上';
-    // } else if (now === 12) {
-    //     half = '中午';
-    // } else if (now > 12 && now < 18 || now === 18) {
-    //     half = '下午';
-    // } else if (now > 18 && now < 23 || now === 23) {
-    //     half = '晚上';
-    // } else if (now < 6) {
-    //     half = '凌晨';
-    // }
-    // var text = half + now + '点: \r\n' + string.repeat(now);
-
-    // 新版
-    var text;
-    var repeatString = string.repeat(now);
-
-    // todo: 优化逻辑，减少 hardcode
-    switch (now) {
-        case 1:
-            text = '凌晨1点。\r\n' + '呼~'.repeat(now);
-            break;
-        case 2:
-            text = '凌晨2点。\r\n' + '呼~'.repeat(now);
-            break;
-        case 3:
-            text = '凌晨3点。\r\n' + '啪~'.repeat(now);
-            break;
-        case 4:
-            text = '凌晨4点。\r\n' + '呼~'.repeat(now);
-            break;
-        case 5:
-            text = '凌晨5点。\r\n' + '呼~'.repeat(now);
-            break;
-        case 6:
-            text = '早上6点。\r\n' + '呼~'.repeat(now);
-            break;
-        case 7:
-            text = '早上7点。\r\n起床打卡。\r\n' + '噗~'.repeat(now);
-            break;
-        case 8:
-            text = '早上8点。\r\n早餐打卡。\r\n' + '饿~'.repeat(now);
-            break;
-        case 9:
-            text = '早上9点。\r\n和大笨鸭吵了一架。\r\n' + repeatString;
-            break;
-        case 10:
-            text = '早上10点。\r\n想做一只猫。\r\n' + '喵~'.repeat(now);
-            break;
-        case 11:
-            text = '早上11点。\r\n' + repeatString;
-            break;
-        case 12:
-            text = '中午12点。\r\n无可奈何鸡睡去，\r\n似曾相识喵归来。\r\n' + '喵~'.repeat(now);
-            break;
-        case 13:
-            text = '下午1点。\r\n' + string.repeat(1);
-            break;
-        case 14:
-            text = '下午2点。\r\n' + string.repeat(2);
-            break;
-        case 15:
-            text = '下午3点。\r\n' + '哼！'.repeat(3);
-            break;
-        case 16:
-            text = '下午4点。\r\n' + string.repeat(4);
-            break;
-        case 17:
-            text = '下午5点。\r\n' + '嗷~'.repeat(5);
-            break;
-        case 18:
-            text = '下午6点。\r\n' + string.repeat(6);
-            break;
-        case 19:
-            text = '晚上7点。\r\n' + string.repeat(7);
-            break;
-        case 20:
-            text = '晚上8点。\r\n背单词打卡。\r\n' + string.repeat(8);
-            break;
-        case 21:
-            text = '晚上9点。\r\n健身打卡。\r\n' + string.repeat(9);
-            break;
-        case 22:
-            text = '晚上10点。\r\n跑步打卡。\r\n' + string.repeat(10);
-            break;
-        case 23:
-            text = '晚上11点。\r\n晚安。\r\n' + '呼~'.repeat(11);
-            break;
-        case 24:
-            text = '零点。\r\n' + '呼~'.repeat(12);
-            break;
+    if (now < 12 && now > 6 || now === 6) {
+        half = '早上';
+    } else if (now === 12) {
+        half = '中午';
+    } else if (now > 12 && now < 18 || now === 18) {
+        half = '下午';
+        now = now - 12;
+    } else if (now > 18 && now < 23 || now === 23) {
+        half = '晚上';
+        now = now - 12;
+    } else if (now < 6 && now > 0) {
+        half = '凌晨';
+    } else if (now === 0) {
+        half = '午夜';
     }
+
+    if (now !== 0) {
+        text = half + now + '点。\r\n' + string.repeat(now);
+    } else {
+        text = half + now + '点。\r\n晚安。';
+    }
+    
+
+
+
+    // // 新版
+    // var text;
+    // var repeatString = string.repeat(now);
+
+    // // todo: 优化逻辑，减少 hardcode
+    // switch (now) {
+    //     case 1:
+    //         text = '凌晨1点。\r\n' + '呼~'.repeat(now);
+    //         break;
+    //     case 2:
+    //         text = '凌晨2点。\r\n' + '呼~'.repeat(now);
+    //         break;
+    //     case 3:
+    //         text = '凌晨3点。\r\n' + '啪~'.repeat(now);
+    //         break;
+    //     case 4:
+    //         text = '凌晨4点。\r\n' + '呼~'.repeat(now);
+    //         break;
+    //     case 5:
+    //         text = '凌晨5点。\r\n' + '呼~'.repeat(now);
+    //         break;
+    //     case 6:
+    //         text = '早上6点。\r\n' + '呼~'.repeat(now);
+    //         break;
+    //     case 7:
+    //         text = '早上7点。\r\n起床打卡。\r\n' + '噗~'.repeat(now);
+    //         break;
+    //     case 8:
+    //         text = '早上8点。\r\n早餐打卡。\r\n' + '饿~'.repeat(now);
+    //         break;
+    //     case 9:
+    //         text = '早上9点。\r\n和大笨鸭吵了一架。\r\n' + repeatString;
+    //         break;
+    //     case 10:
+    //         text = '早上10点。\r\n想做一只猫。\r\n' + '喵~'.repeat(now);
+    //         break;
+    //     case 11:
+    //         text = '早上11点。\r\n' + repeatString;
+    //         break;
+    //     case 12:
+    //         text = '中午12点。\r\n无可奈何鸡睡去，\r\n似曾相识喵归来。\r\n' + '喵~'.repeat(now);
+    //         break;
+    //     case 13:
+    //         text = '下午1点。\r\n' + string.repeat(1);
+    //         break;
+    //     case 14:
+    //         text = '下午2点。\r\n' + string.repeat(2);
+    //         break;
+    //     case 15:
+    //         text = '下午3点。\r\n' + '哼！'.repeat(3);
+    //         break;
+    //     case 16:
+    //         text = '下午4点。\r\n' + string.repeat(4);
+    //         break;
+    //     case 17:
+    //         text = '下午5点。\r\n' + '嗷~'.repeat(5);
+    //         break;
+    //     case 18:
+    //         text = '下午6点。\r\n' + string.repeat(6);
+    //         break;
+    //     case 19:
+    //         text = '晚上7点。\r\n' + string.repeat(7);
+    //         break;
+    //     case 20:
+    //         text = '晚上8点。\r\n背单词打卡。\r\n' + string.repeat(8);
+    //         break;
+    //     case 21:
+    //         text = '晚上9点。\r\n健身打卡。\r\n' + string.repeat(9);
+    //         break;
+    //     case 22:
+    //         text = '晚上10点。\r\n跑步打卡。\r\n' + string.repeat(10);
+    //         break;
+    //     case 23:
+    //         text = '晚上11点。\r\n晚安。\r\n' + '呼~'.repeat(11);
+    //         break;
+    //     case 24:
+    //         text = '零点。\r\n' + '呼~'.repeat(12);
+    //         break;
+    // }
 
     return text;
 }
