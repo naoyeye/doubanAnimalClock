@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-07-01 14:32:47
+* @Last Modified time: 2015-07-10 19:01:33
 */
 
 // jshint ignore:start
@@ -13,9 +13,9 @@ var request = require('request');
 var schedule = require('node-schedule');
 var session = require('express-session');
 var everyauthCN = require('everyauth-cn');
-everyauthCN.douban.scope('douban_basic_common,shuo_basic_w,shuo_basic_r');
-var conf = require('./config/sns-config');
-var authSettings = require('./config/auth-settings');
+var config = require('./config/app-config');
+everyauthCN.douban.scope(config.douban.scope);
+var authSettings = require('./config/everyauthCN/auth-settings');
 var nodemailer = require('nodemailer');
 
 
@@ -54,6 +54,7 @@ everyauthCN.debug = false;
 var date;
 var now; // 当前是第几个小时
 // var image; // 广播配图
+var isLaunched = false;
 
 // 为字符串添加 repeat 方法:
 // 判断是否存在这个方法
@@ -65,17 +66,6 @@ if (!String.repeat) {
     }
 }
 
-// 创建邮件发送器
-var smtpTransport = nodemailer.createTransport('SMTP',{
-    service: 'Gmail',
-    auth: {
-        user: conf.mailer.user,
-        pass: conf.mailer.pass
-    }
-});
-
-
-
 console.log('====== start =====');
 
 app.get('/', function (req, res) {
@@ -83,23 +73,15 @@ app.get('/', function (req, res) {
     // 判断是不是拿到了 token
     if (typeof req.session.auth !== 'undefined') {
 
-        // console.log('req.session = ', req.session);
-        // console.log('req.session.auth.douban.user = ', req.session.auth.douban.user);
-
         // 判断是不是豆瓣大笨鸡的 uid
-        // todo: 通过 config 增加多个帐
-        // 68576413 是本地测试的一个帐号
-        if (req.session.auth.douban.user.id === '67736974' || req.session.auth.douban.user.id === '68576413') {
+        if (config.userId.indexOf(req.session.auth.douban.user.id) > 0) {
             // 取得 token
+
             var accessToken = req.session.auth.douban.accessToken;
             var refresh_token = req.session.auth.douban.user.accessTokenExtra.refresh_token;
 
             // 提前获取广播配图
             // image = request.get('http://7bv90p.com1.z0.glb.clouddn.com/333.png');
-
-            // 定义自动定时任务的规则
-            var rule = new schedule.RecurrenceRule();
-            rule.minute = [0, 60]; // 会有延迟
 
             /* just for testing */
             // var text = generateText();
@@ -107,46 +89,47 @@ app.get('/', function (req, res) {
             /* test */
 
             // 开始自动定时任务
-            var autoTask = schedule.scheduleJob(rule, function () {
+            if (!isLaunched) {
+                // 定义自动定时任务的规则
+                var rule = new schedule.RecurrenceRule();
+                rule.minute = [0, 60]; // 会有延迟
 
+                var autoTask = schedule.scheduleJob(rule, function () {
 
-                // 调整时区
-                var d = new Date(); //创建一个Date对象
-                var localTime = d.getTime();
-                var localOffset = d.getTimezoneOffset() * 60000; //获得当地时间偏移的毫秒数
-                var utc = localTime + localOffset; //utc即GMT时间
-                var offset = 8; //以北京时间为例，东8区
-                var beijing = utc + (3600000 * offset);
-                date = new Date(beijing); // 得到最终的准确时间
-                now = date.getHours(); // 得到当前小时
+                    // 调整时区
+                    var d = new Date(); //创建一个Date对象
+                    var localTime = d.getTime();
+                    var localOffset = d.getTimezoneOffset() * 60000; //获得当地时间偏移的毫秒数
+                    var utc = localTime + localOffset; //utc即GMT时间
+                    var offset = 8; //以北京时间为例，东8区
+                    var beijing = utc + (3600000 * offset);
+                    date = new Date(beijing); // 得到最终的准确时间
+                    now = date.getHours(); // 得到当前小时
 
-                // if (now === 0) {
-                //     now = 24;
-                // }
+                    var text = generateText();
 
-                var text = generateText();
-
-                // console.log('text = ', text);
-
-                postToDouban(accessToken, refresh_token, text, date, function (err, httpResponse, body) {
-                    // if (!err) {
-                    //     console.log('豆瓣广播发布成功！偶也');
-                    // } else {
-                    //     console.error(error, body);
-                    // }
+                    postToDouban(accessToken, refresh_token, text, date, function (err, httpResponse, body) {
+                        // if (!err) {
+                        //     console.log('豆瓣广播发布成功！偶也');
+                        // } else {
+                        //     console.error(error, body);
+                        // }
+                    });
                 });
-            });
 
-            res.render('hello', {message: '欢迎豆瓣大笨鸡！'});
-            return;
+                isLaunched = true;
+                
+                res.render('hello', {currentUser: true, message: '欢迎豆瓣大笨鸡！程序启动成功。'});
+            } else {
+                res.render('hello', {currentUser: true, message: '欢迎豆瓣大笨鸡！程序已经启动过了。'});
+            }
 
         } else {
-            res.render('hello', {message: '骗谁呢？你根本不是豆瓣大笨鸡！'});
-            return;
+            res.render('hello', {currentUser: false, message: '骗谁呢？你根本不是豆瓣大笨鸡！'});
         }
 
     } else {
-        res.render('hello', {message: '请问，你是豆瓣大笨鸡吗？'});
+        res.render('hello', {currentUser: false, message: '请问，你是豆瓣大笨鸡吗？'});
     }
 });
 
@@ -315,9 +298,9 @@ function postToDouban (accessToken, refresh_token, text, date, callback) {
 
 // 刷新获取 token
 function refreshToken (refresh_token) {
-    var client_id = conf.douban.apiKey;
-    var client_secret = conf.douban.Secret;
-    var redirect_uri = conf.douban.redirect_uri;
+    var client_id = config.douban.apiKey;
+    var client_secret = config.douban.Secret;
+    var redirect_uri = config.douban.redirect_uri;
 
     request.post({
         url: 'https://www.douban.com/service/auth2/token?client_id=' + client_id + '&client_secret=' + client_secret + '&redirect_uri=' + redirect_uri + '&grant_type=refresh_token&refresh_token=' + refresh_token,
@@ -333,13 +316,26 @@ function refreshToken (refresh_token) {
 
 // 发送邮件
 function mailSender (subject, text, callback) {
+    if (!config.mailer.recipient || !config.mailer.user || !config.mailer.pass) {
+        return;
+    }
+
     console.log(date + 'sendMail...');
     var mailOptions = {
-        from: '豆瓣大笨鸡 <'+ conf.mailer.user + '>',
-        to: conf.mailer.recipient.join(','), // list of receivers
+        from: '豆瓣大笨鸡 <'+ config.mailer.user + '>',
+        to: config.mailer.recipient.join(','), // list of receivers
         subject: subject,
         text: text
     };
+
+    // 创建邮件发送器
+    var smtpTransport = nodemailer.createTransport('SMTP',{
+        service: 'Gmail',
+        auth: {
+            user: config.mailer.user,
+            pass: config.mailer.pass
+        }
+    });
 
     smtpTransport.sendMail(mailOptions, function(mailError, mailResponse){
         if (callback && typeof callback === 'function') {

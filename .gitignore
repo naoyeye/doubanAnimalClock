@@ -9,6 +9,5 @@
 /.sass-cache/
 /.tmp/
 /gzip/
-/config/global.json
-/cloud/config/auth-settings.js
-/cloud/config/sns-config.js
+
+/cloud/config/app-config.js

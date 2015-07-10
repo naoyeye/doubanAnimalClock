@@ -28,16 +28,19 @@ html(lang='zh-cmn-Hans')
             else if everyauth.douban
                 - var user = everyauth.douban.user
 
-                if user.id === '67736974' || user.id === '68576413'
-                    //- p.description= JSON.stringify(sess)
-                    //- p.uid= user.uid
-                    //- p#name= user.name
-                    //- p.created= user.created
-                    //- img(src='#{ user.large_avatar }')
+                if currentUser === true
+                    p.id 用户 id : #{user.id}
+                    p.uid 用户 uid : #{user.uid}
+                    p#name 昵称: #{user.name}
+                    p.created 注册时间: #{user.created}
+                    img(src='#{ user.large_avatar }')
 
                 else
                     p 不跟你玩儿！
 
         footer
-            | copyright 2015 by 
-            a(href='http://www.douban.com/people/dabenji/', target='_blank') dabenji
+            p
+                | copyright 2015 by 
+                a(href='http://www.douban.com/people/#{user.uid}', target='_blank') #{user.name}
+                |  - 
+                a(href='https://github.com/naoyeye/doubanAnimalClock', target='_blank') Github
