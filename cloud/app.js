@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-07-10 19:01:33
+* @Last Modified time: 2015-07-10 19:21:20
 */
 
 // jshint ignore:start
@@ -74,7 +74,7 @@ app.get('/', function (req, res) {
     if (typeof req.session.auth !== 'undefined') {
 
         // 判断是不是豆瓣大笨鸡的 uid
-        if (config.userId.indexOf(req.session.auth.douban.user.id) > 0) {
+        if (config.userId.indexOf(req.session.auth.douban.user.id) >= 0) {
             // 取得 token
 
             var accessToken = req.session.auth.douban.accessToken;
