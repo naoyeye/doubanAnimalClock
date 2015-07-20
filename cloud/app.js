@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-07-21 01:10:42
+* @Last Modified time: 2015-07-21 02:05:19
 */
 
 // jshint ignore:start
@@ -10,6 +10,8 @@
 var express = require('express');
 
 var request = require('request');
+require('request-debug')(request);
+
 var schedule = require('node-schedule');
 var session = require('express-session');
 var everyauthCN = require('everyauth-cn');
@@ -80,7 +82,7 @@ app.get('/', function (req, res) {
             /* test */            
             if (!isLaunched) {
                 var rule = new schedule.RecurrenceRule();
-                rule.minute = [0, 59];
+                rule.minute = [0, 6];
 
                 var autoTask = schedule.scheduleJob(rule, function () {
 
@@ -147,35 +149,43 @@ function generateText () {
 }
 
 function postToDouban (accessToken, refresh_token, text, date, callback) {
-    var r = request.post('https://api.douban.com/shuo/v2/statuses/', {
-            method: 'POST',
-            headers: {'Authorization': 'Bearer ' + accessToken},
-            timeout: 10000
-        }, function (err, httpResponse, body) {
-            if (err && err.code === 106) {
-                console.error(date + '\r\nHOT fuck！Clock fail! We need to refresh token!', err);
+    request.post({
+        url: 'https://api.douban.com/shuo/v2/statuses/',
+        headers: {'Authorization': 'Bearer ' + accessToken},
+        form: {text: 'hello'}
+    }, function(err, httpResponse, body) {
+        console.log(body);
+    });
 
-                refreshToken(refresh_token);
-                console.log('===========');
-            } else if (err || typeof body.code !== 'undefined') {
-                console.error(date + '\r\nFuck! Clock fail!, Error:', err, '\r\n Body:', body);
-                mailSender('FxxK dabenji!', body, function (mailError, mailResponse) {
-                    console.log('Sender feedback:', mailError, mailResponse);
-                });
-                console.log('===========');
-            } else {
-                console.log(date + '\r\nLOL clock success!');
-                console.log('===========');
-                console.log('body = ', body);
-            }
+    // var r = request.post('https://api.douban.com/shuo/v2/statuses/', {
+    //         method: 'POST',
+    //         headers: {'Authorization': 'Bearer ' + accessToken, 'text': 'hello!!!'},
+    //         timeout: 10000
+    //     }, function (err, httpResponse, body) {
+    //         if (err && err.code === 106) {
+    //             console.error(date + '\r\nHOT fuck! Clock fail! We need to refresh token!', err);
 
-            if (callback && typeof callback === 'function') {
-                callback(err, httpResponse, body);
-            }
-        });
+    //             refreshToken(refresh_token);
+    //             console.log('===========');
+    //         } else if (err || typeof body.code !== 'undefined') {
+    //             console.error(date + '\r\nFuck!Clock fail!, Error:', err, '\r\n Body:', body);
+    //             mailSender('FxxK dabenji!', body, function (mailError, mailResponse) {
+    //                 console.log('Sender feedback:', mailError, mailResponse);
+    //             });
+    //             console.log('===========');
+    //         } else {
+    //             console.log(date + '\r\nLOL clock success!');
+    //             console.log('===========');
+    //             console.log('body = ', body);
+    //         }
 
-    var form = r.form();
-    form.append('text', text);
+    //         if (callback && typeof callback === 'function') {
+    //             callback(err, httpResponse, body);
+    //         }
+    //     });
+
+    // var form = r.form();
+    // // form.append('text', text);
 }
 
 function refreshToken (refresh_token) {
@@ -189,7 +199,7 @@ function refreshToken (refresh_token) {
         if (!error && response.statusCode == 200) {
             postToDouban(resBody.access_token, resBody.refresh_token, text, date, callback);
         } else {
-            console.error(date + 'refresh_token fail！', error, resBody);
+            console.error(date + 'refresh_token fail!', error, resBody);
         }
     });
 }
