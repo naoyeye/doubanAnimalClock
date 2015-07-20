@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-07-21 00:31:06
+* @Last Modified time: 2015-07-21 00:34:18
 */
 
 // jshint ignore:start
@@ -13,9 +13,9 @@ var request = require('request');
 var schedule = require('node-schedule');
 var session = require('express-session');
 var everyauthCN = require('everyauth-cn');
-var config = require('cloud/config/app-config');
+var config = require('./config/app-config');
 everyauthCN.douban.scope(config.douban.scope);
-var authSettings = require('cloud/config/everyauthCN/auth-settings');
+var authSettings = require('./config/everyauthCN/auth-settings');
 var nodemailer = require('nodemailer');
 
 
