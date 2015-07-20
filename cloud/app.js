@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-07-21 02:18:07
+* @Last Modified time: 2015-07-21 02:27:11
 */
 
 // jshint ignore:start
@@ -105,17 +105,17 @@ app.get('/', function (req, res) {
 
                 isLaunched = true;
                 
-                res.render('hello', {currentUser: true, message: 'welcome dabenji! launch done!'});
+                res.render('hello', {currentUser: true, message: '欢迎大笨鸡，程序启动成功！'});
             } else {
-                res.render('hello', {currentUser: true, message: 'welcome dabenji! already launched。'});
+                res.render('hello', {currentUser: true, message: '欢迎大笨鸡，程序已经启动了！'});
             }
 
         } else {
-            res.render('hello', {currentUser: false, message: 'WTF?!'});
+            res.render('hello', {currentUser: false, message: '你不是大笨鸡，只有大笨鸡才能报时。'});
         }
 
     } else {
-        res.render('hello', {currentUser: false, message: 'R U dabenji?'});
+        res.render('hello', {currentUser: false, message: '你是大笨鸡吗？不是大笨鸡不要点下面的按钮。'});
     }
 });
 
