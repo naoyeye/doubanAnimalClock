@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-07-21 02:05:19
+* @Last Modified time: 2015-07-21 02:13:42
 */
 
 // jshint ignore:start
@@ -10,7 +10,7 @@
 var express = require('express');
 
 var request = require('request');
-require('request-debug')(request);
+// require('request-debug')(request);
 
 var schedule = require('node-schedule');
 var session = require('express-session');
@@ -79,10 +79,11 @@ app.get('/', function (req, res) {
             /* just for testing */
             // var text = generateText();
             // console.log(text);
-            /* test */            
+            /* test */
+
             if (!isLaunched) {
                 var rule = new schedule.RecurrenceRule();
-                rule.minute = [0, 6];
+                rule.minute = [0, 20];
 
                 var autoTask = schedule.scheduleJob(rule, function () {
 
@@ -120,29 +121,29 @@ app.get('/', function (req, res) {
 
 
 function generateText () {
-    var string = ' A-';
+    var string = '咯-';
     var text;
 
     if (now < 12 && now > 6 || now === 6) {
-        half = 'AM';
+        half = '早上';
     } else if (now === 12) {
-        half = 'AM';
+        half = '中午';
     } else if (now > 12 && now < 18 || now === 18) {
-        half = 'PM';
+        half = '下午';
         now = now - 12;
     } else if (now > 18 && now < 23 || now === 23) {
-        half = 'PM';
+        half = '晚上';
         now = now - 12;
     } else if (now < 6 && now > 0) {
-        half = 'AM';
+        half = '凌晨';
     } else if (now === 0) {
-        half = 'AM';
+        half = '午夜';
     }
 
     if (now !== 0) {
-        text = half + now + '\r\n' + string.repeat(now);
+        text = half + now + '点。\r\n' + string.repeat(now);
     } else {
-        text = half + now + '\r\n night!';
+        text = half + now + '点。\r\n晚安。';
     }
 
     return text;
@@ -152,9 +153,30 @@ function postToDouban (accessToken, refresh_token, text, date, callback) {
     request.post({
         url: 'https://api.douban.com/shuo/v2/statuses/',
         headers: {'Authorization': 'Bearer ' + accessToken},
-        form: {text: 'hello'}
+        encoding: 'utf8',
+        json: true,
+        form: {text: text}
     }, function(err, httpResponse, body) {
-        console.log(body);
+        if (err && err.code === 106) {
+            console.error(date + '\r\nHoly fuck! Clock fail! We need to refresh token!', err);
+
+            refreshToken(refresh_token);
+            console.log('===========');
+        } else if (err || typeof body.code !== 'undefined') {
+            console.error(date + '\r\nFuck! Clock fail!, Error:', err, '\r\n Body:', body);
+            mailSender('FxxK dabenji!', body, function (mailError, mailResponse) {
+                console.log('Sender feedback:', mailError, mailResponse);
+            });
+            console.log('===========');
+        } else {
+            console.log(date + '\r\nLOL clock success!');
+            console.log('===========');
+            console.log('body = ', body);
+        }
+
+        if (callback && typeof callback === 'function') {
+            callback(err, httpResponse, body);
+        }
     });
 
     // var r = request.post('https://api.douban.com/shuo/v2/statuses/', {
