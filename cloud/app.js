@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-07-21 00:36:06
+* @Last Modified time: 2015-07-21 00:44:28
 */
 
 // jshint ignore:start
@@ -166,6 +166,7 @@ function postToDouban (accessToken, refresh_token, text, date, callback) {
             } else {
                 console.log(date + '\r\nLOL clock success!');
                 console.log('===========');
+                console.log('body = ', body);
             }
 
             if (callback && typeof callback === 'function') {
