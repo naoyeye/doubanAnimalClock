@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-07-21 02:13:42
+* @Last Modified time: 2015-07-21 02:18:07
 */
 
 // jshint ignore:start
@@ -83,7 +83,7 @@ app.get('/', function (req, res) {
 
             if (!isLaunched) {
                 var rule = new schedule.RecurrenceRule();
-                rule.minute = [0, 20];
+                rule.minute = [0, 60];
 
                 var autoTask = schedule.scheduleJob(rule, function () {
 
@@ -171,7 +171,6 @@ function postToDouban (accessToken, refresh_token, text, date, callback) {
         } else {
             console.log(date + '\r\nLOL clock success!');
             console.log('===========');
-            console.log('body = ', body);
         }
 
         if (callback && typeof callback === 'function') {
