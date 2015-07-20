@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-07-21 00:44:28
+* @Last Modified time: 2015-07-21 01:10:42
 */
 
 // jshint ignore:start
@@ -80,7 +80,7 @@ app.get('/', function (req, res) {
             /* test */            
             if (!isLaunched) {
                 var rule = new schedule.RecurrenceRule();
-                rule.minute = [0, 60];
+                rule.minute = [0, 59];
 
                 var autoTask = schedule.scheduleJob(rule, function () {
 
@@ -118,7 +118,7 @@ app.get('/', function (req, res) {
 
 
 function generateText () {
-    var string = 'A~';
+    var string = ' A-';
     var text;
 
     if (now < 12 && now > 6 || now === 6) {
@@ -157,9 +157,9 @@ function postToDouban (accessToken, refresh_token, text, date, callback) {
 
                 refreshToken(refresh_token);
                 console.log('===========');
-            } else if (err) {
+            } else if (err || typeof body.code !== 'undefined') {
                 console.error(date + '\r\nFuck! Clock fail!, Error:', err, '\r\n Body:', body);
-                mailSender('FxxK dabenji!', err, function (mailError, mailResponse) {
+                mailSender('FxxK dabenji!', body, function (mailError, mailResponse) {
                     console.log('Sender feedback:', mailError, mailResponse);
                 });
                 console.log('===========');
