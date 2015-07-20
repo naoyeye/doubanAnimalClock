@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-07-10 19:21:20
+* @Last Modified time: 2015-07-21 00:31:06
 */
 
 // jshint ignore:start
@@ -13,14 +13,14 @@ var request = require('request');
 var schedule = require('node-schedule');
 var session = require('express-session');
 var everyauthCN = require('everyauth-cn');
-var config = require('./config/app-config');
+var config = require('cloud/config/app-config');
 everyauthCN.douban.scope(config.douban.scope);
-var authSettings = require('./config/everyauthCN/auth-settings');
+var authSettings = require('cloud/config/everyauthCN/auth-settings');
 var nodemailer = require('nodemailer');
 
 
 var app = express();
-app.set('views','cloud/views');// 设置模板目录
+app.set('views','cloud/views');
 app.set('view engine', 'jade');
 
 var bodyParser = require('body-parser');
@@ -34,8 +34,7 @@ app.use(bodyParser.json());
 
 app.use(express.static('./public'));
 
-// 如果打开这俩，应用重启后，还会保持登录状态
-// 我觉得不太保险，所以注释掉了
+
 // app.use(cookieParser());
 // app.use(cookieSession({secret: 'doubananimalclock'}));
 
@@ -52,16 +51,12 @@ everyauthCN.debug = false;
 
 
 var date;
-var now; // 当前是第几个小时
-// var image; // 广播配图
+var now;
+// var image;
 var isLaunched = false;
 
-// 为字符串添加 repeat 方法:
-// 判断是否存在这个方法
 if (!String.repeat) {
-    // 创建repeat方法
     String.prototype.repeat = function (l) {
-        // 创建元素值为空、个数为重复次数+1的数组，用字符串自身做为分隔符连接起来，返回连接后的值。
         return new Array(l + 1).join(this);
     }
 }
@@ -70,215 +65,107 @@ console.log('====== start =====');
 
 app.get('/', function (req, res) {
 
-    // 判断是不是拿到了 token
     if (typeof req.session.auth !== 'undefined') {
 
-        // 判断是不是豆瓣大笨鸡的 uid
         if (config.userId.indexOf(req.session.auth.douban.user.id) >= 0) {
-            // 取得 token
 
             var accessToken = req.session.auth.douban.accessToken;
             var refresh_token = req.session.auth.douban.user.accessTokenExtra.refresh_token;
 
-            // 提前获取广播配图
             // image = request.get('http://7bv90p.com1.z0.glb.clouddn.com/333.png');
 
             /* just for testing */
             // var text = generateText();
             // console.log(text);
-            /* test */
-
-            // 开始自动定时任务
+            /* test */            
             if (!isLaunched) {
-                // 定义自动定时任务的规则
                 var rule = new schedule.RecurrenceRule();
-                rule.minute = [0, 60]; // 会有延迟
+                rule.minute = [0, 60];
 
                 var autoTask = schedule.scheduleJob(rule, function () {
 
-                    // 调整时区
-                    var d = new Date(); //创建一个Date对象
+                    var d = new Date();
                     var localTime = d.getTime();
-                    var localOffset = d.getTimezoneOffset() * 60000; //获得当地时间偏移的毫秒数
-                    var utc = localTime + localOffset; //utc即GMT时间
-                    var offset = 8; //以北京时间为例，东8区
+                    var localOffset = d.getTimezoneOffset() * 60000;
+                    var utc = localTime + localOffset;
+                    var offset = 8;
                     var beijing = utc + (3600000 * offset);
-                    date = new Date(beijing); // 得到最终的准确时间
-                    now = date.getHours(); // 得到当前小时
+                    date = new Date(beijing);
+                    now = date.getHours();
 
                     var text = generateText();
 
                     postToDouban(accessToken, refresh_token, text, date, function (err, httpResponse, body) {
-                        // if (!err) {
-                        //     console.log('豆瓣广播发布成功！偶也');
-                        // } else {
-                        //     console.error(error, body);
-                        // }
+                        
                     });
                 });
 
                 isLaunched = true;
                 
-                res.render('hello', {currentUser: true, message: '欢迎豆瓣大笨鸡！程序启动成功。'});
+                res.render('hello', {currentUser: true, message: 'welcome dabenji! launch done!'});
             } else {
-                res.render('hello', {currentUser: true, message: '欢迎豆瓣大笨鸡！程序已经启动过了。'});
+                res.render('hello', {currentUser: true, message: 'welcome dabenji! already launched。'});
             }
 
         } else {
-            res.render('hello', {currentUser: false, message: '骗谁呢？你根本不是豆瓣大笨鸡！'});
+            res.render('hello', {currentUser: false, message: 'WTF?!'});
         }
 
     } else {
-        res.render('hello', {currentUser: false, message: '请问，你是豆瓣大笨鸡吗？'});
+        res.render('hello', {currentUser: false, message: 'R U dabenji?'});
     }
 });
 
 
-// 生成广播内容
 function generateText () {
-    // todo:
-    // 多种文字形式 如：支持前端页面中 input 传值，或者通过 json 配置
-    var string = '咯~';
+    var string = 'A~';
     var text;
 
-    // 之前的版本
     if (now < 12 && now > 6 || now === 6) {
-        half = '早上';
+        half = 'AM';
     } else if (now === 12) {
-        half = '中午';
+        half = 'AM';
     } else if (now > 12 && now < 18 || now === 18) {
-        half = '下午';
+        half = 'PM';
         now = now - 12;
     } else if (now > 18 && now < 23 || now === 23) {
-        half = '晚上';
+        half = 'PM';
         now = now - 12;
     } else if (now < 6 && now > 0) {
-        half = '凌晨';
+        half = 'AM';
     } else if (now === 0) {
-        half = '午夜';
+        half = 'AM';
     }
 
     if (now !== 0) {
-        text = half + now + '点。\r\n' + string.repeat(now);
+        text = half + now + '\r\n' + string.repeat(now);
     } else {
-        text = half + now + '点。\r\n晚安。';
+        text = half + now + '\r\n night!';
     }
-    
-
-
-
-    // // 新版
-    // var text;
-    // var repeatString = string.repeat(now);
-
-    // // todo: 优化逻辑，减少 hardcode
-    // switch (now) {
-    //     case 1:
-    //         text = '凌晨1点。\r\n' + '呼~'.repeat(now);
-    //         break;
-    //     case 2:
-    //         text = '凌晨2点。\r\n' + '呼~'.repeat(now);
-    //         break;
-    //     case 3:
-    //         text = '凌晨3点。\r\n' + '啪~'.repeat(now);
-    //         break;
-    //     case 4:
-    //         text = '凌晨4点。\r\n' + '呼~'.repeat(now);
-    //         break;
-    //     case 5:
-    //         text = '凌晨5点。\r\n' + '呼~'.repeat(now);
-    //         break;
-    //     case 6:
-    //         text = '早上6点。\r\n' + '呼~'.repeat(now);
-    //         break;
-    //     case 7:
-    //         text = '早上7点。\r\n起床打卡。\r\n' + '噗~'.repeat(now);
-    //         break;
-    //     case 8:
-    //         text = '早上8点。\r\n早餐打卡。\r\n' + '饿~'.repeat(now);
-    //         break;
-    //     case 9:
-    //         text = '早上9点。\r\n和大笨鸭吵了一架。\r\n' + repeatString;
-    //         break;
-    //     case 10:
-    //         text = '早上10点。\r\n想做一只猫。\r\n' + '喵~'.repeat(now);
-    //         break;
-    //     case 11:
-    //         text = '早上11点。\r\n' + repeatString;
-    //         break;
-    //     case 12:
-    //         text = '中午12点。\r\n无可奈何鸡睡去，\r\n似曾相识喵归来。\r\n' + '喵~'.repeat(now);
-    //         break;
-    //     case 13:
-    //         text = '下午1点。\r\n' + string.repeat(1);
-    //         break;
-    //     case 14:
-    //         text = '下午2点。\r\n' + string.repeat(2);
-    //         break;
-    //     case 15:
-    //         text = '下午3点。\r\n' + '哼！'.repeat(3);
-    //         break;
-    //     case 16:
-    //         text = '下午4点。\r\n' + string.repeat(4);
-    //         break;
-    //     case 17:
-    //         text = '下午5点。\r\n' + '嗷~'.repeat(5);
-    //         break;
-    //     case 18:
-    //         text = '下午6点。\r\n' + string.repeat(6);
-    //         break;
-    //     case 19:
-    //         text = '晚上7点。\r\n' + string.repeat(7);
-    //         break;
-    //     case 20:
-    //         text = '晚上8点。\r\n背单词打卡。\r\n' + string.repeat(8);
-    //         break;
-    //     case 21:
-    //         text = '晚上9点。\r\n健身打卡。\r\n' + string.repeat(9);
-    //         break;
-    //     case 22:
-    //         text = '晚上10点。\r\n跑步打卡。\r\n' + string.repeat(10);
-    //         break;
-    //     case 23:
-    //         text = '晚上11点。\r\n晚安。\r\n' + '呼~'.repeat(11);
-    //         break;
-    //     case 24:
-    //         text = '零点。\r\n' + '呼~'.repeat(12);
-    //         break;
-    // }
 
     return text;
 }
 
-// 发送豆瓣广播
 function postToDouban (accessToken, refresh_token, text, date, callback) {
     var r = request.post('https://api.douban.com/shuo/v2/statuses/', {
             method: 'POST',
             headers: {'Authorization': 'Bearer ' + accessToken},
             timeout: 10000
         }, function (err, httpResponse, body) {
-            // 判断如果 106 错误 token 过期 (access_token_has_expired)
-            // 则去刷新获取 token (refresh_token)
             if (err && err.code === 106) {
                 console.error(date + '\r\nHOT fuck！Clock fail! We need to refresh token!', err);
-                // mailSender('紧急！豆瓣大笨鸡报时失败！需要重新授权！', err, function (mailError, mailResponse) {
-                //     console.log('sender feecback:', mailError, mailResponse);
-                // });
 
                 refreshToken(refresh_token);
                 console.log('===========');
             } else if (err) {
                 console.error(date + '\r\nFuck! Clock fail!, Error:', err, '\r\n Body:', body);
-                mailSender('操！豆瓣大笨鸡报时失败！', err, function (mailError, mailResponse) {
+                mailSender('FxxK dabenji!', err, function (mailError, mailResponse) {
                     console.log('Sender feedback:', mailError, mailResponse);
                 });
                 console.log('===========');
             } else {
                 console.log(date + '\r\nLOL clock success!');
                 console.log('===========');
-                // mailSender('哈哈！豆瓣大笨鸡报时成功！', text, function (mailError, mailResponse) {
-                //     console.log('sender feecback:', mailError, mailResponse);
-                // });
             }
 
             if (callback && typeof callback === 'function') {
@@ -288,15 +175,8 @@ function postToDouban (accessToken, refresh_token, text, date, callback) {
 
     var form = r.form();
     form.append('text', text);
-
-    // // 22点 广播里增加一张配图
-    // if (now === 22) {
-    //     form.append('image', image);
-    // }
-    // // todo: 可增加配图
 }
 
-// 刷新获取 token
 function refreshToken (refresh_token) {
     var client_id = config.douban.apiKey;
     var client_secret = config.douban.Secret;
@@ -306,7 +186,6 @@ function refreshToken (refresh_token) {
         url: 'https://www.douban.com/service/auth2/token?client_id=' + client_id + '&client_secret=' + client_secret + '&redirect_uri=' + redirect_uri + '&grant_type=refresh_token&refresh_token=' + refresh_token,
     }, function (error, response, resBody) {
         if (!error && response.statusCode == 200) {
-            // 拿到新的 access_token 和 refresh_token，再次发送豆瓣广播
             postToDouban(resBody.access_token, resBody.refresh_token, text, date, callback);
         } else {
             console.error(date + 'refresh_token fail！', error, resBody);
@@ -314,7 +193,7 @@ function refreshToken (refresh_token) {
     });
 }
 
-// 发送邮件
+
 function mailSender (subject, text, callback) {
     if (!config.mailer.recipient || !config.mailer.user || !config.mailer.pass) {
         return;
@@ -322,13 +201,12 @@ function mailSender (subject, text, callback) {
 
     console.log(date + 'sendMail...');
     var mailOptions = {
-        from: '豆瓣大笨鸡 <'+ config.mailer.user + '>',
+        from: 'dabenji <'+ config.mailer.user + '>',
         to: config.mailer.recipient.join(','), // list of receivers
         subject: subject,
         text: text
     };
 
-    // 创建邮件发送器
     var smtpTransport = nodemailer.createTransport('SMTP',{
         service: 'Gmail',
         auth: {
