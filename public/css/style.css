@@ -2,7 +2,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 19:30:42
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-06-25 19:30:48
+* @Last Modified time: 2015-10-09 18:38:54
 */
 
 * {
@@ -52,6 +52,10 @@ a.button  {
     border-radius: 3px;
     background: #3fa156;
     border: 1px solid #528641;
+}
+
+.mamamiya {
+    padding-top: 20px;
 }
 
 footer {

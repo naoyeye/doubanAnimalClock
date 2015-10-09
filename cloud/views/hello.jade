@@ -22,13 +22,12 @@ html(lang='zh-cmn-Hans')
 
             p.message #{message}
 
-            if !everyauth.loggedIn
+            if !tryLogged
                 a.button(href='/auth/douban') 我就是大笨鸡，快让我进去！
 
-            else if everyauth.douban
-                - var user = everyauth.douban.user
-
+            else
                 if currentUser === true
+                    p 进来了！
                     //- p.id 用户 id : #{user.id}
                     //- p.uid 用户 uid : #{user.uid}
                     //- p#name 昵称: #{user.name}
@@ -36,7 +35,9 @@ html(lang='zh-cmn-Hans')
                     //- img(src='#{ user.large_avatar }')
 
                 else
-                    p 不跟你玩儿！
+                    p 不跟你玩儿
+                    p.mamamiya
+                        a.button(href='/reAuth') 刚才手滑
 
         footer
             p
