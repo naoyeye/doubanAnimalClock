@@ -4,7 +4,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2015-10-09 18:47:15
+* @Last Modified time: 2016-03-23 09:54:39
 */
 
 // jshint ignore:start
@@ -189,7 +189,7 @@ app.get('/reAuth', function (req, res) {
 });
 
 function generateText () {
-    var string = '咯-';
+    var string = '🐔';
     var text;
 
     if (now < 12 && now > 6 || now === 6) {
