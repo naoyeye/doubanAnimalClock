@@ -4,7 +4,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   Jiyun
-* @Last Modified time: 2016-03-23 09:54:39
+* @Last Modified time: 2016-03-23 16:27:03
 */
 
 // jshint ignore:start
@@ -211,7 +211,7 @@ function generateText () {
     if (now !== 0) {
         text = half + now + '点。\r\n' + string.repeat(now);
     } else {
-        text = half + now + '点。\r\n晚安。';
+        text = half + now + '点。\r\n🌙😪💤';
     }
 
     return text;
