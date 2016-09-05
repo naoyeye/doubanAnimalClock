@@ -3,8 +3,8 @@
 /* 
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
-* @Last Modified by:   Jiyun
-* @Last Modified time: 2016-03-23 16:27:03
+* @Last Modified by:   hanjiyun
+* @Last Modified time: 2016-09-05 15:21:04
 */
 
 // jshint ignore:start
@@ -122,9 +122,9 @@ app.get('/', function (req, res) {
 
                 isLaunched = true;
                 
-                res.render('hello', {currentUser: true, tryLogged: true, message: '欢迎大笨鸡，程序启动成功！'});
+                res.render('hello', {currentUser: true, tryLogged: true, message: '欢迎大笨鸡，嘻嘻嘻嘻嘻！'});
             } else {
-                res.render('hello', {currentUser: true, tryLogged: true, message: '欢迎大笨鸡，程序已经启动了！'});
+                res.render('hello', {currentUser: true, tryLogged: true, message: '欢迎大笨鸡，哈哈哈哈哈哈！'});
             }
 
         } else {
