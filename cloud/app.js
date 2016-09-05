@@ -3,8 +3,8 @@
 /* 
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
-* @Last Modified by:   hanjiyun
-* @Last Modified time: 2016-09-05 15:21:04
+* @Last Modified by:   Jiyun
+* @Last Modified time: 2016-04-15 11:29:18
 */
 
 // jshint ignore:start
@@ -66,12 +66,14 @@ var curl = require('curlrequest');
 
 var date;
 var now;
-// var image;
-var isLaunched = false;
+// var image; // 用来发送的图片
+var isLaunched = false; // 是否已经启动
+var lastLaunch = null; // 上次程序启动的时间
 
+// API 相关
 var accessToken = null;
 var refresh_token;
-var currentUserId;
+var currentUserId; // 拿到的用户 id
 
 if (!String.repeat) {
     String.prototype.repeat = function (l) {
@@ -98,33 +100,57 @@ app.get('/', function (req, res) {
             // console.log(text);
             /* test */
 
+
+
             if (!isLaunched) {
-                var rule = new schedule.RecurrenceRule();
-                rule.minute = [0, 60];
+                // var rule = new schedule.RecurrenceRule();
+                // // rule.minute = [0, 60];
+                // rule.minute = [57]
 
-                var autoTask = schedule.scheduleJob(rule, function () {
+                // var autoTask = schedule.scheduleJob(rule, function () {
 
-                    var d = new Date();
-                    var localTime = d.getTime();
-                    var localOffset = d.getTimezoneOffset() * 60000;
-                    var utc = localTime + localOffset;
-                    var offset = 8;
-                    var beijing = utc + (3600000 * offset);
-                    date = new Date(beijing);
-                    now = date.getHours();
+                //     var d = new Date();
+                //     var localTime = d.getTime();
+                //     var localOffset = d.getTimezoneOffset() * 60000;
+                //     var utc = localTime + localOffset;
+                //     var offset = 8;
+                //     var beijing = utc + (3600000 * offset);
+                //     date = new Date(beijing);
+                //     now = date.getHours();
 
-                    var text = generateText();
+                //     // 设置程序启动的时间
+                //     whenClockStrat = date;
 
-                    postToDouban(accessToken, refresh_token, text, date, function (err, httpResponse, body) {
-                        
-                    });
-                });
+                //     console.log('whenClockStrat', whenClockStrat)
+
+                //     var text = generateText();
+
+                //     postToDouban(accessToken, refresh_token, text, date, function (err, httpResponse, body) {});
+                // });
+
+                var d = new Date();
+                var localTime = d.getTime();
+                var localOffset = d.getTimezoneOffset() * 60000;
+                var utc = localTime + localOffset;
+                var offset = 8;
+                var beijing = utc + (3600000 * offset);
+                date = new Date(beijing);
+                now = date.getHours();
+
+                // 设置程序启动的时间
+                whenClockStrat = getNowDate();
+
+                console.log('whenClockStrat === ', whenClockStrat)
+
+                var text = generateText();
+
+                postToDouban(accessToken, refresh_token, text, date, function (err, httpResponse, body) {});
 
                 isLaunched = true;
                 
-                res.render('hello', {currentUser: true, tryLogged: true, message: '欢迎大笨鸡，嘻嘻嘻嘻嘻！'});
+                res.render('hello', {currentUser: true, tryLogged: true, message: '欢迎大笨鸡！'});
             } else {
-                res.render('hello', {currentUser: true, tryLogged: true, message: '欢迎大笨鸡，哈哈哈哈哈哈！'});
+                res.render('hello', {currentUser: true, tryLogged: true, message: '欢迎大笨鸡，我已经哈哈了！'});
             }
 
         } else {
@@ -168,6 +194,8 @@ app.get('/auth/douban/callback', function (req, res) {
         parts = parts.split('\r\n');
         var data = JSON.parse(parts.pop());
 
+        // console.log('data = ', data)
+
         accessToken = data.access_token;
         refresh_token = data.refresh_token;
         currentUserId = data.douban_user_id;
@@ -178,7 +206,6 @@ app.get('/auth/douban/callback', function (req, res) {
 
     });
 });
-
 
 app.get('/reAuth', function (req, res) {
     accessToken = null;
@@ -225,6 +252,8 @@ function postToDouban (accessToken, refresh_token, text, date, callback) {
         json: true,
         form: {text: text}
     }, function(err, httpResponse, body) {
+        // 每五天自动重新获取
+
         if (err && err.code === 106) {
             console.error(date + '\r\nHoly fuck! Clock fail! We need to refresh token!', err);
 
@@ -232,7 +261,7 @@ function postToDouban (accessToken, refresh_token, text, date, callback) {
             console.log('===========');
         } else if (err || typeof body.code !== 'undefined') {
             console.error(date + '\r\nFuck! Clock fail!, Error:', err, '\r\n Body:', body);
-            mailSender('FxxK dabenji!', body, function (mailError, mailResponse) {
+            mailSender('FxxK dabenji!', JSON.stringify(body), function (mailError, mailResponse) {
                 console.log('Sender feedback:', mailError, mailResponse);
             });
             console.log('===========');
@@ -320,6 +349,36 @@ function mailSender (subject, text, callback) {
             callback(mailError, mailResponse);
         }
     });
+}
+
+function getNowDate() {
+    var myT = new Date(),
+        myYear = myT.getFullYear(),
+        myMonth = myT.getMonth() + 1,
+        myDate = myT.getDate();
+
+    if(myMonth < 10){
+        myMonth = '0' + myMonth
+    }
+
+    if(myDate < 10){
+        myDate = '0' + myDate
+    }
+
+    return myYear + '-' + myMonth + '-' + myDate;
+}
+
+function daysBetween(DateOne, DateTwo){
+    var OneMonth = DateOne.substring(5,DateOne.lastIndexOf ('-'));  
+    var OneDay = DateOne.substring(DateOne.length,DateOne.lastIndexOf ('-')+1);  
+    var OneYear = DateOne.substring(0,DateOne.indexOf ('-'));  
+
+    var TwoMonth = DateTwo.substring(5,DateTwo.lastIndexOf ('-'));  
+    var TwoDay = DateTwo.substring(DateTwo.length,DateTwo.lastIndexOf ('-')+1);  
+    var TwoYear = DateTwo.substring(0,DateTwo.indexOf ('-'));  
+  
+    var cha=((Date.parse(OneMonth+'/'+OneDay+'/'+OneYear)- Date.parse(TwoMonth+'/'+TwoDay+'/'+TwoYear))/86400000);
+    return Math.abs(cha);
 }
 
 app.listen(8181);

@@ -17,8 +17,8 @@ html(lang='zh-cmn-Hans')
 
     body
         #wrap
-            img(src="http://img3.douban.com/icon/ul67736974-6.jpg")
-            h1 豆瓣大笨鸡の官方网站
+            //- img(src="http://img3.douban.com/icon/ul67736974-6.jpg")
+            //- h1 豆瓣大笨鸡の官方网站
 
             p.message #{message}
 
@@ -28,11 +28,6 @@ html(lang='zh-cmn-Hans')
             else
                 if currentUser === true
                     p 进来了！
-                    //- p.id 用户 id : #{user.id}
-                    //- p.uid 用户 uid : #{user.uid}
-                    //- p#name 昵称: #{user.name}
-                    //- p.created 注册时间: #{user.created}
-                    //- img(src='#{ user.large_avatar }')
 
                 else
                     p 不跟你玩儿
@@ -41,7 +36,7 @@ html(lang='zh-cmn-Hans')
 
         footer
             p
-                | copyright 2015 by 
+                | copyright 2016 by 
                 a(href='http://www.douban.com/people/dabenji', target='_blank') dabenji
                 |  - 
                 a(href='https://github.com/naoyeye/doubanAnimalClock', target='_blank') Github
