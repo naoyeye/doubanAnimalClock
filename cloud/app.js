@@ -5,7 +5,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   hanjiyun
-* @Last Modified time: 2016-12-17 00:33:13
+* @Last Modified time: 2016-12-17 01:10:25
 */
 
 // jshint ignore:start
@@ -108,18 +108,43 @@ app.get('/', function (req, res) {
                 });
 
                 isLaunched = true;
+
+                var data = {
+                    currentUser: true,
+                    tryLogged: true,
+                    message: '欢迎大笨鸡，嘻嘻嘻嘻嘻！',
+                    imageUrl: imageUrl
+                }
                 
-                res.render('hello', {currentUser: true, tryLogged: true, message: '欢迎大笨鸡，嘻嘻嘻嘻嘻！'});
+                res.render('hello', data);
             } else {
-                res.render('hello', {currentUser: true, tryLogged: true, message: '欢迎大笨鸡，哈哈哈哈哈哈！'});
+                var data = {
+                    currentUser: true,
+                    tryLogged: true,
+                    message: '欢迎大笨鸡，哈哈哈哈哈哈！',
+                    imageUrl: imageUrl
+                }
+                res.render('hello', data);
             }
 
         } else {
-            res.render('hello', {currentUser: false, tryLogged: true,  message: '你不是大笨鸡，只有大笨鸡才能报时。'});
+            var data = {
+                currentUser: false,
+                tryLogged: true,
+                message: '你不是大笨鸡，只有大笨鸡才能报时。',
+                imageUrl: imageUrl
+            }
+            res.render('hello', data);
         }
 
     } else {
-        res.render('hello', {currentUser: false, tryLogged: false, message: '你是大笨鸡吗？不是大笨鸡不要点下面的按钮。'});
+        var data = {
+            currentUser: false,
+            tryLogged: false,
+            message: '你是大笨鸡吗？不是大笨鸡不要点下面的按钮。',
+            imageUrl: imageUrl
+        }
+        res.render('hello', data);
     }
 });
 
