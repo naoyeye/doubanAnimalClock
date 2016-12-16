@@ -5,7 +5,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   hanjiyun
-* @Last Modified time: 2016-12-17 01:10:25
+* @Last Modified time: 2016-12-17 02:12:12
 */
 
 // jshint ignore:start
@@ -284,8 +284,6 @@ function postToDouban (accessToken, refresh_token, text, date, callback) {
         } else {
             console.log(date + '\r\nLOL clock success!');
             console.log('===========');
-            // 清空 imageUrl
-            imageUrl = '';
         }
 
         if (callback && typeof callback === 'function') {
