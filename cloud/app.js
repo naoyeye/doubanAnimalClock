@@ -1,19 +1,19 @@
+/* eslint-disable */
 /*global $, jQuery, ga, _, AV, FastClick, wx, campaignTools, Swiper, performance */
 
 /* 
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   hanjiyun
-* @Last Modified time: 2016-09-05 15:21:04
+* @Last Modified time: 2016-12-17 00:33:13
 */
 
 // jshint ignore:start
 
 var express = require('express');
-
 var request = require('request');
 var url = require('url');
-var querystring = require('querystring');
+// var querystring = require('querystring');
 // require('request-debug')(request);
 
 var schedule = require('node-schedule');
@@ -23,12 +23,13 @@ var config = require('./config/app-config');
 // everyauthCN.douban.scope(config.douban.scope);
 // var authSettings = require('./config/everyauthCN/auth-settings');
 var nodemailer = require('nodemailer');
-
+var cheerio = require('cheerio')
+var curl = require('curlrequest');
+var remoteFileSize = require('remote-file-size');
 
 var app = express();
 app.set('views','cloud/views');
 app.set('view engine', 'jade');
-
 app.disable('x-powered-by');
 
 var bodyParser = require('body-parser');
@@ -43,30 +44,10 @@ app.use(bodyParser.json());
 app.use(express.static('./public'));
 
 
-var curl = require('curlrequest');
-
-
-
-// app.use(cookieParser());
-// app.use(cookieSession({secret: 'doubananimalclock'}));
-
-
-// app.use(session({
-//     secret: 'doubananimalclock',
-//     resave: false,
-//     saveUninitialized: true,
-//     // cookie: { secure: true }
-// }));
-// app.use(everyauthCN.middleware());
-
-// everyauthCN.debug = true;
-
-
-
 
 var date;
 var now;
-// var image;
+var imageUrl = '';
 var isLaunched = false;
 
 var accessToken = null;
@@ -81,6 +62,8 @@ if (!String.repeat) {
 
 console.log('====== start =====');
 
+// 每次启动先去自动取图
+getImageUrl();
 
 app.get('/', function (req, res) {
 
@@ -91,19 +74,25 @@ app.get('/', function (req, res) {
             // var accessToken = req.session.auth.douban.accessToken;
             // var refresh_token = req.session.auth.douban.user.accessTokenExtra.refresh_token;
 
-            // image = request.get('http://7bv90p.com1.z0.glb.clouddn.com/333.png');
-
             /* just for testing */
             // var text = generateText();
             // console.log(text);
             /* test */
 
             if (!isLaunched) {
-                var rule = new schedule.RecurrenceRule();
-                rule.minute = [0, 60];
+                var ruleGetImage = new schedule.RecurrenceRule();
+                var rulePostStatus = new schedule.RecurrenceRule();
 
-                var autoTask = schedule.scheduleJob(rule, function () {
+                ruleGetImage.minute = [0, 30]; // 每到 30 分钟时取图片
+                rulePostStatus.minute = [0, 60]; // 整点发广播
 
+                var autoGetImage = schedule.scheduleJob(ruleGetImage, function() {
+                    if (!imageUrl) {
+                        getImageUrl();
+                    }
+                });
+
+                var autoPostStatusTask = schedule.scheduleJob(rulePostStatus, function () {
                     var d = new Date();
                     var localTime = d.getTime();
                     var localOffset = d.getTimezoneOffset() * 60000;
@@ -115,9 +104,7 @@ app.get('/', function (req, res) {
 
                     var text = generateText();
 
-                    postToDouban(accessToken, refresh_token, text, date, function (err, httpResponse, body) {
-                        
-                    });
+                    postToDouban(accessToken, refresh_token, text, date, function (err, httpResponse, body) {});
                 });
 
                 isLaunched = true;
@@ -137,7 +124,12 @@ app.get('/', function (req, res) {
 });
 
 app.get('/auth/douban', function (req, res) {
-    res.redirect('https://www.douban.com/service/auth2/auth?client_id=' + config.douban.apiKey + '&redirect_uri=' + config.douban.redirect_uri + '&response_type=code&scope=' + config.douban.scope);
+    res.redirect('https://www.douban.com/service/auth2/auth?client_id='
+        + config.douban.apiKey
+        + '&redirect_uri='
+        + config.douban.redirect_uri 
+        + '&response_type=code&scope=' 
+        + config.douban.scope);
 });
 
 app.get('/auth/douban/callback', function (req, res) {
@@ -218,13 +210,41 @@ function generateText () {
 }
 
 function postToDouban (accessToken, refresh_token, text, date, callback) {
-    request.post({
-        url: 'https://api.douban.com/shuo/v2/statuses/',
-        headers: {'Authorization': 'Bearer ' + accessToken},
-        encoding: 'utf8',
-        json: true,
-        form: {text: text}
-    }, function(err, httpResponse, body) {
+    // 纯文字版
+    // request.post({
+    //     url: 'https://api.douban.com/shuo/v2/statuses/',
+    //     headers: {'Authorization': 'Bearer ' + accessToken},
+    //     encoding: 'utf8',
+    //     json: true,
+    //     form: {text: text, image: image}
+    // }, function(err, httpResponse, body) {
+    //     if (err && err.code === 106) {
+    //         console.error(date + '\r\nHoly fuck! Clock fail! We need to refresh token!', err);
+
+    //         refreshToken(refresh_token);
+    //         console.log('===========');
+    //     } else if (err || typeof body.code !== 'undefined') {
+    //         console.error(date + '\r\nFuck! Clock fail!, Error:', err, '\r\n Body:', body);
+    //         mailSender('FxxK dabenji!', body, function (mailError, mailResponse) {
+    //             console.log('Sender feedback:', mailError, mailResponse);
+    //         });
+    //         console.log('===========');
+    //     } else {
+    //         console.log(date + '\r\nLOL clock success!');
+    //         console.log('===========');
+    //     }
+
+    //     if (callback && typeof callback === 'function') {
+    //         callback(err, httpResponse, body);
+    //     }
+    // });
+
+    // 带图版
+    var r = request.post('https://api.douban.com/shuo/v2/statuses/', {
+            method: 'POST',
+            headers: {'Authorization': 'Bearer ' + accessToken},
+            // timeout: 70000 // 7秒超时吧
+        }, function (err, httpResponse, body) {
         if (err && err.code === 106) {
             console.error(date + '\r\nHoly fuck! Clock fail! We need to refresh token!', err);
 
@@ -239,6 +259,8 @@ function postToDouban (accessToken, refresh_token, text, date, callback) {
         } else {
             console.log(date + '\r\nLOL clock success!');
             console.log('===========');
+            // 清空 imageUrl
+            imageUrl = '';
         }
 
         if (callback && typeof callback === 'function') {
@@ -246,37 +268,12 @@ function postToDouban (accessToken, refresh_token, text, date, callback) {
         }
     });
 
-    // var r = request.post('https://api.douban.com/shuo/v2/statuses/', {
-    //         method: 'POST',
-    //         headers: {'Authorization': 'Bearer ' + accessToken, 'text': 'hello!!!'},
-    //         timeout: 10000
-    //     }, function (err, httpResponse, body) {
-    //         if (err && err.code === 106) {
-    //             console.error(date + '\r\nHOT fuck! Clock fail! We need to refresh token!', err);
-
-    //             refreshToken(refresh_token);
-    //             console.log('===========');
-    //         } else if (err || typeof body.code !== 'undefined') {
-    //             console.error(date + '\r\nFuck!Clock fail!, Error:', err, '\r\n Body:', body);
-    //             mailSender('FxxK dabenji!', body, function (mailError, mailResponse) {
-    //                 console.log('Sender feedback:', mailError, mailResponse);
-    //             });
-    //             console.log('===========');
-    //         } else {
-    //             console.log(date + '\r\nLOL clock success!');
-    //             console.log('===========');
-    //             console.log('body = ', body);
-    //         }
-
-    //         if (callback && typeof callback === 'function') {
-    //             callback(err, httpResponse, body);
-    //         }
-    //     });
-
-    // var form = r.form();
-    // // form.append('text', text);
+    var form = r.form();
+    form.append('text', text);
+    form.append('image', request.get(imageUrl));
 }
 
+// todo 这里有 bug 导致无法正常 refreshToken
 function refreshToken (refresh_token) {
     var client_id = config.douban.apiKey;
     var client_secret = config.douban.Secret;
@@ -320,6 +317,30 @@ function mailSender (subject, text, callback) {
             callback(mailError, mailResponse);
         }
     });
+}
+
+// get random gif image url
+function getImageUrl() {
+  request('http://www.funcage.com/gif/?', function(error, response, body) {
+    if (error) {
+      return;
+    }
+
+    var $ = cheerio.load(response.body, {
+      decodeEntities: false,
+      xmlMode: false,
+      normalizeWhitespace: false
+    });
+
+    imageUrl = $('.cimg img').attr('src').replace('./', 'http://www.funcage.com/gif/');
+    remoteFileSize(imageUrl, function(error, size) {
+        // 如果图片大于2M，重新获取 (其实豆瓣规定的是不大于 3M，但为了发广播的速度更快，这里缩小标准到2M)
+        if (size > 1500000) {
+            // console.log('image's too big to send');
+            getImageUrl();
+        }
+    });
+  });
 }
 
 app.listen(8181);
