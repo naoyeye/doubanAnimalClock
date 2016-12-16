@@ -5,7 +5,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   hanjiyun
-* @Last Modified time: 2016-12-17 02:12:12
+* @Last Modified time: 2016-12-17 02:43:39
 */
 
 // jshint ignore:start
@@ -148,6 +148,18 @@ app.get('/', function (req, res) {
     }
 });
 
+app.get('/new', function (req, res) {
+    if (config.userId.indexOf(currentUserId) >= 0) {
+        getImageUrl({
+            isRefresh: true,
+        }, function(imageUrl) {
+            res.send('<img src="' + imageUrl + '">');
+        });
+    } else {
+        res.redirect('/');
+    }
+});
+
 app.get('/auth/douban', function (req, res) {
     res.redirect('https://www.douban.com/service/auth2/auth?client_id='
         + config.douban.apiKey
@@ -206,7 +218,7 @@ app.get('/reAuth', function (req, res) {
 });
 
 function generateText () {
-    var string = '🐔';
+    var string = '🐔 ';
     var text;
 
     if (now < 12 && now > 6 || now === 6) {
@@ -226,9 +238,9 @@ function generateText () {
     }
 
     if (now !== 0) {
-        text = half + now + '点。\r\n' + string.repeat(now);
+        text = half + now + '点。#不动戳大# \r\n' + string.repeat(now);
     } else {
-        text = half + now + '点。\r\n🌙😪💤';
+        text = half + now + '点。#不动戳大# \r\n🌙😪💤';
     }
 
     return text;
@@ -343,7 +355,7 @@ function mailSender (subject, text, callback) {
 }
 
 // get random gif image url
-function getImageUrl() {
+function getImageUrl(option, callback) {
   request('http://www.funcage.com/gif/?', function(error, response, body) {
     if (error) {
       return;
@@ -356,11 +368,18 @@ function getImageUrl() {
     });
 
     imageUrl = $('.cimg img').attr('src').replace('./', 'http://www.funcage.com/gif/');
+    // console.log('imageUrl = ', imageUrl)
     remoteFileSize(imageUrl, function(error, size) {
-        // 如果图片大于2M，重新获取 (其实豆瓣规定的是不大于 3M，但为了发广播的速度更快，这里缩小标准到2M)
-        if (size > 1500000) {
-            // console.log('image's too big to send');
-            getImageUrl();
+        // 如果图片大于2.8M，重新获取 (其实豆瓣规定的是不大于 3M，但为了发广播的速度更快，这里缩小标准到2.8M)
+        if (size > 2800000) {
+            // console.log('image\'s too big to send');
+            getImageUrl(option, callback);
+        } else {
+            if (option && option.isRefresh) {
+                if (callback && typeof callback === 'function') {
+                    callback(imageUrl);
+                }
+            }
         }
     });
   });
