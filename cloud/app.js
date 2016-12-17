@@ -5,7 +5,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   hanjiyun
-* @Last Modified time: 2016-12-17 12:23:26
+* @Last Modified time: 2016-12-17 14:16:32
 */
 
 // jshint ignore:start
@@ -63,7 +63,7 @@ if (!String.repeat) {
 console.log('====== start =====');
 
 // 每次启动先去自动取图
-getImageUrl();
+// getImageUrl();
 
 app.get('/', function (req, res) {
 
