@@ -5,7 +5,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   hanjiyun
-* @Last Modified time: 2016-12-17 02:43:39
+* @Last Modified time: 2016-12-17 12:23:26
 */
 
 // jshint ignore:start
@@ -87,9 +87,7 @@ app.get('/', function (req, res) {
                 rulePostStatus.minute = [0, 60]; // 整点发广播
 
                 var autoGetImage = schedule.scheduleJob(ruleGetImage, function() {
-                    if (!imageUrl) {
-                        getImageUrl();
-                    }
+                    getImageUrl();
                 });
 
                 var autoPostStatusTask = schedule.scheduleJob(rulePostStatus, function () {
