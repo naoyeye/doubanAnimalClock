@@ -5,12 +5,13 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   hanjiyun
-* @Last Modified time: 2016-12-17 14:16:32
+* @Last Modified time: 2016-12-18 00:13:27
 */
 
 // jshint ignore:start
 
 var express = require('express');
+var fs = require('fs');
 var request = require('request');
 var url = require('url');
 // var querystring = require('querystring');
@@ -25,7 +26,12 @@ var config = require('./config/app-config');
 var nodemailer = require('nodemailer');
 var cheerio = require('cheerio')
 var curl = require('curlrequest');
-var remoteFileSize = require('remote-file-size');
+// var remoteFileSize = require('remote-file-size');
+var sizeOf = require('image-size'); // 获取图片长宽
+var resizer = require('limby-resize')({
+  imagemagick: require('imagemagick'),
+});
+// var images = require("images");
 
 var app = express();
 app.set('views','cloud/views');
@@ -47,7 +53,7 @@ app.use(express.static('./public'));
 
 var date;
 var now;
-var imageUrl = '';
+var imageUrl = 'http://dabenji.doubanclock.com/pic/test-small.gif';
 var isLaunched = false;
 
 var accessToken = null;
@@ -236,7 +242,7 @@ function generateText () {
     }
 
     if (now !== 0) {
-        text = half + now + '点。#不动戳大# \r\n' + string.repeat(now);
+        text = half + now + '点。#不动戳大# \r\n 为什么 gif 图在电脑上必须要查看原图播放？ \r\n' + string.repeat(now);
     } else {
         text = half + now + '点。#不动戳大# \r\n🌙😪💤';
     }
@@ -294,6 +300,7 @@ function postToDouban (accessToken, refresh_token, text, date, callback) {
         } else {
             console.log(date + '\r\nLOL clock success!');
             console.log('===========');
+            // console.log('body = ', body)
         }
 
         if (callback && typeof callback === 'function') {
@@ -354,34 +361,87 @@ function mailSender (subject, text, callback) {
 
 // get random gif image url
 function getImageUrl(option, callback) {
-  request('http://www.funcage.com/gif/?', function(error, response, body) {
-    if (error) {
-      return;
-    }
-
-    var $ = cheerio.load(response.body, {
-      decodeEntities: false,
-      xmlMode: false,
-      normalizeWhitespace: false
-    });
-
-    imageUrl = $('.cimg img').attr('src').replace('./', 'http://www.funcage.com/gif/');
-    // console.log('imageUrl = ', imageUrl)
-    remoteFileSize(imageUrl, function(error, size) {
-        // 如果图片大于2.8M，重新获取 (其实豆瓣规定的是不大于 3M，但为了发广播的速度更快，这里缩小标准到2.8M)
-        if (size > 2800000) {
-            // console.log('image\'s too big to send');
-            getImageUrl(option, callback);
-        } else {
-            if (option && option.isRefresh) {
-                if (callback && typeof callback === 'function') {
-                    callback(imageUrl);
-                }
-            }
+    request('http://www.funcage.com/gif/?', function(error, response, body) {
+        if (error) {
+          return;
         }
+
+        var $ = cheerio.load(response.body, {
+          decodeEntities: false,
+          xmlMode: false,
+          normalizeWhitespace: false
+        });
+
+        imageUrl = $('.cimg img').attr('src').replace('./', 'http://www.funcage.com/gif/');
+
+        console.log('imageUrl', imageUrl)
+
+        request.head(imageUrl, function(_err, _res, _body) {
+            var size = _res.headers['content-length'];
+            console.log('size:', size)
+
+            // 如果图片大于2.8M，重新获取 (其实豆瓣规定的是不大于 3M，但为了发广播的速度更快，这里缩小标准到2.8M)
+            if (size > 2800000) {
+                console.log('image\'s too big to send');
+                getImageUrl(option, callback);
+            } else {
+                var chunks = [];
+
+                request.get(imageUrl).on('data', function(chunk) {
+                    chunks.push(chunk);
+                    // console.log('chunk = ', chunk);
+                }).on('end', function() {
+                    var buffer = Buffer.concat(chunks);
+                    console.log(sizeOf(buffer));
+
+                    // 如果图片宽度大于300
+                    if (sizeOf(buffer).width > 150 || sizeOf(buffer).height > 150) {
+                        console.log('image reszing');
+
+                        // images(buffer).size(200).save("output.jpg", {
+                        //     quality : 100
+                        // });
+
+                        // 保存图片到本地
+                        download(imageUrl, 'test.gif', function() {
+                            console.log("downloaded to test.gif")
+
+                            // 将图片缩小尺寸，重新保存
+                            resizer.resize('test.gif', {
+                              width: 150,
+                              height: 150,
+                              coalesce: true,
+                              destination: './public/pic/test-small.gif'
+                            });
+
+                            console.log('保存完成');
+
+                            if (option && option.isRefresh) {
+                                if (callback && typeof callback === 'function') {
+                                    callback(imageUrl);
+                                }
+                            }
+                        })
+                    } else {
+                        if (option && option.isRefresh) {
+                            if (callback && typeof callback === 'function') {
+                                callback(imageUrl);
+                            }
+                        }
+                    }
+                });
+            }
+        });
     });
-  });
 }
+
+function download(uri, filename, callback){
+  request.head(uri, function(err, res, body){
+    // console.log('content-type:', res.headers['content-type']);
+    console.log('content-length:', res.headers['content-length']);
+    request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+  });
+};
 
 app.listen(8181);
 
