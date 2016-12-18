@@ -5,7 +5,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   hanjiyun
-* @Last Modified time: 2016-12-18 12:14:11
+* @Last Modified time: 2016-12-18 12:19:35
 */
 
 // jshint ignore:start
@@ -407,12 +407,12 @@ function getImageUrl(option, callback) {
                             console.log("downloaded to test.gif")
 
                             // 将图片缩小尺寸，重新保存
-                            resizer.resize('test.gif', {
-                              width: 150,
-                              height: 150,
-                              coalesce: true,
-                              destination: './public/pic/test-small.gif'
-                            });
+                            // resizer.resize('test.gif', {
+                            //   width: 150,
+                            //   height: 150,
+                            //   coalesce: true,
+                            //   destination: './public/pic/test-small.gif'
+                            // });
 
                             console.log('保存完成');
 
