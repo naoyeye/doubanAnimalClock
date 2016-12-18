@@ -5,7 +5,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   hanjiyun
-* @Last Modified time: 2016-12-18 12:19:35
+* @Last Modified time: 2016-12-18 17:25:40
 */
 
 // jshint ignore:start
@@ -28,9 +28,11 @@ var cheerio = require('cheerio')
 var curl = require('curlrequest');
 // var remoteFileSize = require('remote-file-size');
 var sizeOf = require('image-size'); // 获取图片长宽
-var resizer = require('limby-resize')({
-  imagemagick: require('imagemagick'),
-});
+// var resizer = require('limby-resize')({
+//   // imagemagick: require('imagemagick'),
+//   canvas: require('canvas')
+// });
+// var rsz = require('rsz')
 // var images = require("images");
 
 var app = express();
@@ -242,7 +244,7 @@ function generateText () {
     }
 
     if (now !== 0) {
-        text = half + now + '点。#不动戳大# \r\n 为什么 gif 图在电脑上必须要查看原图播放？ \r\n' + string.repeat(now);
+        text = half + now + '点。#不动戳大# \r\n' + string.repeat(now);
     } else {
         text = half + now + '点。#不动戳大# \r\n🌙😪💤';
     }
@@ -385,63 +387,65 @@ function getImageUrl(option, callback) {
                 console.log('image\'s too big to send');
                 getImageUrl(option, callback);
             } else {
-                var chunks = [];
 
-                request.get(imageUrl).on('data', function(chunk) {
-                    chunks.push(chunk);
-                    // console.log('chunk = ', chunk);
-                }).on('end', function() {
-                    var buffer = Buffer.concat(chunks);
-                    console.log(sizeOf(buffer));
-
-                    // 如果图片宽度大于300
-                    if (sizeOf(buffer).width > 150 || sizeOf(buffer).height > 150) {
-                        console.log('image reszing');
-
-                        // images(buffer).size(200).save("output.jpg", {
-                        //     quality : 100
-                        // });
-
-                        // 保存图片到本地
-                        download(imageUrl, 'test.gif', function() {
-                            console.log("downloaded to test.gif")
-
-                            // 将图片缩小尺寸，重新保存
-                            // resizer.resize('test.gif', {
-                            //   width: 150,
-                            //   height: 150,
-                            //   coalesce: true,
-                            //   destination: './public/pic/test-small.gif'
-                            // });
-
-                            console.log('保存完成');
-
-                            if (option && option.isRefresh) {
-                                if (callback && typeof callback === 'function') {
-                                    callback('http://dabneji.doubanclock.com/pic/test-small.gif');
-                                }
-                            }
-                        })
-                    } else {
-                        if (option && option.isRefresh) {
-                            if (callback && typeof callback === 'function') {
-                                callback(imageUrl);
-                            }
-                        }
+                if (option && option.isRefresh) {
+                    if (callback && typeof callback === 'function') {
+                        callback(imageUrl);
                     }
-                });
+                }
+
+                // // 保存图片到本地
+                // console.log("正在下载图片");
+                // download(imageUrl, './public/pic/test.gif', function() {
+                //     console.log("已保存为 ./public/pic/test.gif")
+
+                //     // 如果图片宽度大于300
+                //     if (sizeOf('./public/pic/test.gif').width > 150 || sizeOf('./public/pic/test.gif').height > 150) {
+                //         console.log('正在缩放图片');
+                //         // 将图片缩小尺寸，重新保存
+                //         // resizer.resize('./public/pic/test.gif', {
+                //         //   width: 150,
+                //         //   height: 150,
+                //         //   coalesce: true,
+                //         //   destination: './public/pic/test-small.gif'
+                //         // });
+
+                //         rsz('./public/pic/test.gif',
+                //             {  width: 200, height: 200, aspectRatio: true, type: 'gif', quality: 100 },
+                //             './public/pic/test-small.gif',
+                //             function (err) {
+                //                 console.log('缩放出错:', err);
+                //             }
+                //         );
+
+
+                //         console.log('保存完成');
+
+                //         if (option && option.isRefresh) {
+                //             if (callback && typeof callback === 'function') {
+                //                 callback('http://dabenji.doubanclock.com/pic/test-small.gif');
+                //             }
+                //         }
+                //     } else {
+                //         if (option && option.isRefresh) {
+                //             if (callback && typeof callback === 'function') {
+                //                 callback(imageUrl);
+                //             }
+                //         }
+                //     }
+                // })
             }
         });
     });
 }
 
-function download(uri, filename, callback){
-  request.head(uri, function(err, res, body){
-    // console.log('content-type:', res.headers['content-type']);
-    console.log('content-length:', res.headers['content-length']);
-    request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-  });
-};
+// function download(uri, filename, callback){
+//   request.head(uri, function(err, res, body){
+//     // console.log('content-type:', res.headers['content-type']);
+//     console.log('content-length:', res.headers['content-length']);
+//     request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+//   });
+// };
 
 app.listen(8181);
 
