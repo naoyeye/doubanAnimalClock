@@ -5,7 +5,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   hanjiyun
-* @Last Modified time: 2016-12-18 00:13:27
+* @Last Modified time: 2016-12-18 12:14:11
 */
 
 // jshint ignore:start
@@ -418,7 +418,7 @@ function getImageUrl(option, callback) {
 
                             if (option && option.isRefresh) {
                                 if (callback && typeof callback === 'function') {
-                                    callback(imageUrl);
+                                    callback('http://dabneji.doubanclock.com/pic/test-small.gif');
                                 }
                             }
                         })
