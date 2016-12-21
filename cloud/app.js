@@ -5,7 +5,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   hanjiyun
-* @Last Modified time: 2016-12-18 17:25:40
+* @Last Modified time: 2016-12-21 20:55:58
 */
 
 // jshint ignore:start
@@ -55,6 +55,8 @@ app.use(express.static('./public'));
 
 var date;
 var now;
+var enableImage = false; // 关闭图片附件
+
 var imageUrl = 'http://dabenji.doubanclock.com/pic/test-small.gif';
 var isLaunched = false;
 
@@ -88,16 +90,16 @@ app.get('/', function (req, res) {
             /* test */
 
             if (!isLaunched) {
-                var ruleGetImage = new schedule.RecurrenceRule();
+                if (enableImage) {
+                    var ruleGetImage = new schedule.RecurrenceRule();
+                    ruleGetImage.minute = [0, 30]; // 每到 30 分钟时取图片
+                    var autoGetImage = schedule.scheduleJob(ruleGetImage, function() {
+                        getImageUrl();
+                    });
+                }
+
                 var rulePostStatus = new schedule.RecurrenceRule();
-
-                ruleGetImage.minute = [0, 30]; // 每到 30 分钟时取图片
                 rulePostStatus.minute = [0, 60]; // 整点发广播
-
-                var autoGetImage = schedule.scheduleJob(ruleGetImage, function() {
-                    getImageUrl();
-                });
-
                 var autoPostStatusTask = schedule.scheduleJob(rulePostStatus, function () {
                     var d = new Date();
                     var localTime = d.getTime();
@@ -119,7 +121,7 @@ app.get('/', function (req, res) {
                     currentUser: true,
                     tryLogged: true,
                     message: '欢迎大笨鸡，嘻嘻嘻嘻嘻！',
-                    imageUrl: imageUrl
+                    imageUrl: enableImage ?  imageUrl : ''
                 }
                 
                 res.render('hello', data);
@@ -128,7 +130,7 @@ app.get('/', function (req, res) {
                     currentUser: true,
                     tryLogged: true,
                     message: '欢迎大笨鸡，哈哈哈哈哈哈！',
-                    imageUrl: imageUrl
+                    imageUrl: enableImage ?  imageUrl : ''
                 }
                 res.render('hello', data);
             }
@@ -138,7 +140,7 @@ app.get('/', function (req, res) {
                 currentUser: false,
                 tryLogged: true,
                 message: '你不是大笨鸡，只有大笨鸡才能报时。',
-                imageUrl: imageUrl
+                imageUrl: enableImage ?  imageUrl : ''
             }
             res.render('hello', data);
         }
@@ -148,7 +150,7 @@ app.get('/', function (req, res) {
             currentUser: false,
             tryLogged: false,
             message: '你是大笨鸡吗？不是大笨鸡不要点下面的按钮。',
-            imageUrl: imageUrl
+            imageUrl: enableImage ?  imageUrl : ''
         }
         res.render('hello', data);
     }
@@ -244,9 +246,9 @@ function generateText () {
     }
 
     if (now !== 0) {
-        text = half + now + '点。#不动戳大# \r\n' + string.repeat(now);
+        text = half + now + '点。 \r\n' + string.repeat(now);
     } else {
-        text = half + now + '点。#不动戳大# \r\n🌙😪💤';
+        text = half + now + '点。 \r\n🌙😪💤';
     }
 
     return text;
@@ -312,7 +314,9 @@ function postToDouban (accessToken, refresh_token, text, date, callback) {
 
     var form = r.form();
     form.append('text', text);
-    form.append('image', request.get(imageUrl));
+    if (enableImage) {
+        form.append('image', request.get(imageUrl));
+    }
 }
 
 // todo 这里有 bug 导致无法正常 refreshToken
@@ -448,5 +452,6 @@ function getImageUrl(option, callback) {
 // };
 
 app.listen(8181);
+console.log('listen port 8181')
 
 // jshint ignore:end

@@ -21,8 +21,9 @@ html(lang='zh-cmn-Hans')
             h1 豆瓣大笨鸡の官方网站
 
 
-            div
-                img(width='300', src='#{imageUrl}')
+            if imageUrl.length > 0
+                div
+                    img(width='300', src='#{imageUrl}')
 
             p.message #{message}
 
