@@ -5,7 +5,7 @@
 * @Author: Jiyun
 * @Date:   2015-06-25 03:35:03
 * @Last Modified by:   hanjiyun
-* @Last Modified time: 2016-12-21 20:55:58
+* @Last Modified time: 2017-12-01 17:07:49
 */
 
 // jshint ignore:start
@@ -226,7 +226,7 @@ app.get('/reAuth', function (req, res) {
 });
 
 function generateText () {
-    var string = '🐔 ';
+    var str = '嗷 ';
     var text;
 
     if (now < 12 && now > 6 || now === 6) {
@@ -246,9 +246,9 @@ function generateText () {
     }
 
     if (now !== 0) {
-        text = half + now + '点。 \r\n' + string.repeat(now);
+        text = half + now + '点。 \r\n' + str.repeat(now);
     } else {
-        text = half + now + '点。 \r\n🌙😪💤';
+        text = half + now + '点。 \r\n 你睡着了没？';
     }
 
     return text;
