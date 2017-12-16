@@ -25,24 +25,26 @@ html(lang='zh-cmn-Hans')
                 div
                     img(width='300', src='#{imageUrl}')
 
-            p.message #{message}
+            p.message 正世界各地旅行，没有精力报时了。阿里嘎多！撒由那拉！
 
-            if !tryLogged
-                a.button(href='/auth/douban') 我就是大笨鸡，快让我进去！
+            //- p.message #{message}
 
-            else
-                if currentUser === true
-                    p 进来了！
-                    //- p.id 用户 id : #{user.id}
-                    //- p.uid 用户 uid : #{user.uid}
-                    //- p#name 昵称: #{user.name}
-                    //- p.created 注册时间: #{user.created}
-                    //- img(src='#{ user.large_avatar }')
+            //- if !tryLogged
+            //-     a.button(href='/auth/douban') 我就是大笨鸡，快让我进去！
 
-                else
-                    p 不跟你玩儿
-                    p.mamamiya
-                        a.button(href='/reAuth') 刚才手滑
+            //- else
+            //-     if currentUser === true
+            //-         p 进来了！
+            //-         //- p.id 用户 id : #{user.id}
+            //-         //- p.uid 用户 uid : #{user.uid}
+            //-         //- p#name 昵称: #{user.name}
+            //-         //- p.created 注册时间: #{user.created}
+            //-         //- img(src='#{ user.large_avatar }')
+
+            //-     else
+            //-         p 不跟你玩儿
+            //-         p.mamamiya
+            //-             a.button(href='/reAuth') 刚才手滑
 
         footer
             p
